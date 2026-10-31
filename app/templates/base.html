@@ -34,27 +34,29 @@
 </head>
 <body class="min-h-screen text-slate-800 antialiased flex flex-col">
 {% set path = request.url.path %}
+{% set em_cal = path.startswith('/calendario') %}
+{% set em_conf = path.startswith('/configuracoes') %}
+{% set em_dash = not (em_cal or em_conf) %}
 
 <!-- Cabeçalho -->
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200/80 shadow-xs">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-sm shadow-emerald-500/20">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-sm shadow-emerald-500/20">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
         </div>
-        <div>
-          <span class="text-base font-bold tracking-tight text-slate-900 block leading-tight">Escala &amp; Banco de Horas</span>
-          <span class="text-xs text-slate-500">Controle de jornada e compensações</span>
+        <div class="min-w-0">
+          <span class="text-sm sm:text-base font-bold tracking-tight text-slate-900 block leading-tight truncate">Escala &amp; Banco de Horas</span>
+          <span class="hidden sm:block text-xs text-slate-500">Controle de jornada e compensações</span>
         </div>
       </div>
+
       <nav class="hidden md:flex items-center space-x-1">
-        {% set em_cal = path.startswith('/calendario') %}
-        {% set em_conf = path.startswith('/configuracoes') %}
-        <a aria-current="{{ 'page' if not (em_cal or em_conf) else 'false' }}"
-           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 shadow-sm' if not (em_cal or em_conf) else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
+        <a aria-current="{{ 'page' if em_dash else 'false' }}"
+           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 shadow-sm' if em_dash else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
            href="/dashboard">Dashboard</a>
         <a aria-current="{{ 'page' if em_cal else 'false' }}"
            class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 shadow-sm' if em_cal else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
@@ -63,26 +65,52 @@
            class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 shadow-sm' if em_conf else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
            href="/configuracoes">Configurações</a>
       </nav>
-      <div class="flex items-center gap-3">
-        <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
+      <div class="flex items-center gap-1 sm:gap-3">
+        <div class="hidden md:block h-6 w-px bg-slate-200"></div>
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-full bg-slate-100 ring-2 ring-emerald-500/20 text-slate-700 font-semibold text-xs flex items-center justify-center">
-            {{ usuario[:2]|upper }}
+          <div class="{{ 'hidden lg:flex' if not em_dash else 'hidden md:flex' }} items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-slate-100 ring-2 ring-emerald-500/20 text-slate-700 font-semibold text-xs flex items-center justify-center">
+              {{ usuario[:2]|upper }}
+            </div>
+            <div class="hidden lg:block text-left">
+              <span class="block text-xs font-semibold text-slate-900 leading-none">{{ usuario }}</span>
+              <span class="text-[11px] text-slate-500 leading-tight">Banco de horas</span>
+            </div>
           </div>
-          <div class="hidden lg:block text-left">
-            <span class="block text-xs font-semibold text-slate-900 leading-none">{{ usuario }}</span>
-            <span class="text-[11px] text-slate-500 leading-tight">Banco de horas</span>
-          </div>
-          <form method="post" action="/logout">
-            <button class="text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-md transition-colors ml-1" type="submit">Sair</button>
+          <form method="post" action="/logout" class="hidden md:block">
+            <button class="text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-md transition-colors" type="submit">Sair</button>
           </form>
         </div>
+        <!-- Botão hambúrguer (só mobile) -->
+        <button id="btn-menu" aria-label="Abrir menu" aria-expanded="false"
+          class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition" type="button">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-width="2"></path>
+          </svg>
+        </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Menu mobile -->
+  <div id="menu-mobile" class="hidden md:hidden border-t border-slate-100 px-3 pb-3 pt-2 space-y-1 bg-white">
+    <a class="block px-3 py-2.5 text-sm font-medium rounded-lg {{ 'bg-slate-900 text-white' if em_dash else 'text-slate-700 hover:bg-slate-100' }}" href="/dashboard">📊 Dashboard</a>
+    <a class="block px-3 py-2.5 text-sm font-medium rounded-lg {{ 'bg-slate-900 text-white' if em_cal else 'text-slate-700 hover:bg-slate-100' }}" href="/calendario">🗓️ Calendário</a>
+    <a class="block px-3 py-2.5 text-sm font-medium rounded-lg {{ 'bg-slate-900 text-white' if em_conf else 'text-slate-700 hover:bg-slate-100' }}" href="/configuracoes">⚙️ Configurações</a>
+    <div class="border-t border-slate-100 pt-2 mt-2 flex items-center justify-between px-3">
+      <span class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700">
+        <span class="w-7 h-7 rounded-full bg-slate-100 ring-2 ring-emerald-500/20 flex items-center justify-center">{{ usuario[:2]|upper }}</span>
+        {{ usuario }}
+      </span>
+      <form method="post" action="/logout">
+        <button class="text-xs font-medium text-rose-600 hover:bg-rose-50 px-2.5 py-1.5 rounded-md" type="submit">Sair</button>
+      </form>
     </div>
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+<main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 w-full flex-1">
   {% if db_erro %}
     <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 flex gap-3">
       <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
@@ -116,16 +144,28 @@
 </main>
 
 <footer class="bg-white border-t border-slate-200 py-6 mt-12">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 text-center sm:text-left">
     <div class="flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
       <span>Escala &amp; Banco de Horas · dados no Supabase</span>
     </div>
-    <div class="flex items-center gap-2">
-      <span>Sistema desenvolvido para gestão pessoal de jornada</span>
-    </div>
+    <span>Sistema desenvolvido para gestão pessoal de jornada</span>
   </div>
 </footer>
+
+<script>
+  const btnMenu = document.getElementById('btn-menu');
+  const menuMobile = document.getElementById('menu-mobile');
+  if (btnMenu) {
+    btnMenu.addEventListener('click', () => {
+      const aberto = !menuMobile.classList.contains('hidden');
+      menuMobile.classList.toggle('hidden', aberto);
+      btnMenu.setAttribute('aria-expanded', String(!aberto));
+    });
+    // fecha ao navegar
+    menuMobile.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menuMobile.classList.add('hidden')));
+  }
+</script>
 
 {% block scripts %}{% endblock %}
 </body>

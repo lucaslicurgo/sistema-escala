@@ -43,7 +43,7 @@
 
 <!-- Cards de indicadores -->
 <section aria-label="Indicadores" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
     <div class="absolute top-0 left-0 right-0 h-1 {{ 'bg-emerald-500' if saldo_positivo else 'bg-rose-500' }}"></div>
     <div class="flex items-start justify-between">
       <div>
@@ -65,7 +65,7 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
     <div class="absolute top-0 left-0 right-0 h-1 {{ 'bg-sky-500' if folgas >= 0 else 'bg-rose-500' }}"></div>
     <div class="flex items-start justify-between">
       <div>
@@ -87,7 +87,7 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
     <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
     <div class="flex items-start justify-between">
       <div>
@@ -107,7 +107,7 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
     <div class="absolute top-0 left-0 right-0 h-1 bg-amber-500"></div>
     <div class="flex items-start justify-between">
       <div>
@@ -134,7 +134,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
 
   <!-- Painel 1: ponto -->
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-6" id="painel-registro">
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6" id="painel-registro">
     <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
       <div class="flex items-center gap-2.5">
         <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700">
@@ -208,7 +208,7 @@
   </section>
 
   <!-- Painel 2: compensação -->
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-6" id="painel-compensacao">
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6" id="painel-compensacao">
     <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
       <div class="flex items-center gap-2.5">
         <div class="p-2 rounded-lg bg-teal-50 text-teal-700">
@@ -281,7 +281,7 @@
 
 <!-- Histórico -->
 <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle overflow-hidden">
-  <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-50/50">
+  <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-50/50">
     <div>
       <h2 class="text-base font-bold text-slate-900">Histórico de {{ mes_label }}</h2>
       <p class="text-xs text-slate-500 mt-0.5">Pontos, compensações e folgas do período</p>
@@ -299,7 +299,7 @@
     <table class="w-full text-left text-xs border-collapse">
       <thead>
         <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-600 font-semibold">
-          <th class="py-3.5 pl-6 pr-3" scope="col">Data</th>
+          <th class="py-3.5 pl-4 sm:pl-6 pr-3" scope="col">Data</th>
           <th class="px-3 py-3.5" scope="col">Dia da Semana</th>
           <th class="px-3 py-3.5" scope="col">Entrada</th>
           <th class="px-3 py-3.5" scope="col">Intervalo</th>
@@ -307,13 +307,13 @@
           <th class="px-3 py-3.5" scope="col">Total Líquido</th>
           <th class="px-3 py-3.5" scope="col">Saldo / Movimento</th>
           <th class="px-3 py-3.5" scope="col">Status</th>
-          <th class="pr-6 pl-3 py-3.5 text-right" scope="col">Ações</th>
+          <th class="pr-4 sm:pr-6 pl-3 py-3.5 text-right" scope="col">Ações</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-200/70 text-slate-700">
         {% for l in linhas %}
         <tr class="hover:bg-slate-50/60 transition {{ 'bg-teal-50/20' if l.tipo == 'compensacao' else '' }}" data-extras="{{ '1' if (l.tipo == 'ponto' and l.tem_extra) else '0' }}" data-kind="{{ 'ponto' if l.tipo == 'ponto' else 'comp' }}">
-          <td class="py-4 pl-6 pr-3 font-semibold text-slate-900 font-mono-numbers">{{ l.data }}</td>
+          <td class="py-4 pl-4 sm:pl-6 pr-3 font-semibold text-slate-900 font-mono-numbers">{{ l.data }}</td>
           <td class="px-3 py-4 text-slate-500">
             {{ l.dia }}
             {% if l.tipo == 'ponto' and l.etiqueta == 'feriado' %}<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">feriado</span>
@@ -351,7 +351,7 @@
               {% if l.obs %}<span class="block mt-1 text-[10.5px] text-slate-500 max-w-[220px] truncate" title="{{ l.obs }}">{{ l.obs }}</span>{% endif %}
             {% endif %}
           </td>
-          <td class="pr-6 pl-3 py-4 text-right">
+          <td class="pr-4 sm:pr-6 pl-3 py-4 text-right">
             <div class="inline-flex items-center gap-1.5 text-slate-400">
               {% if l.tipo == 'ponto' %}
                 <a class="p-1 hover:text-slate-700 rounded transition" href="/registros/{{ l.id }}" title="Editar registro">{{ icone_lapis() }}</a>
@@ -374,7 +374,7 @@
     </table>
   </div>
 
-  <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
+  <div class="px-4 sm:px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
     <div class="flex items-center gap-4">
       <span>Dias com ponto: <strong class="text-slate-900 font-mono-numbers">{{ dias_count }}</strong></span>
       <span class="hidden sm:inline text-slate-300">•</span>
