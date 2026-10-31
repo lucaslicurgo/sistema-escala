@@ -1,0 +1,5 @@
+# Segredos e ambiente local — NÃO versionar
+.env
+.venv/
+__pycache__/
+*.pyc

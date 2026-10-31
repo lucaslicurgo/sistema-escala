@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block titulo %}Calendário · Escala &amp; Banco de Horas{% endblock %}
+{% block conteudo %}
+
+<!-- Barra de período -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 bg-white p-4 rounded-xl border border-slate-200/90 shadow-subtle">
+  <div>
+    <div class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-0.5 uppercase tracking-wider">
+      <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+      </svg>
+      Visão mensal da escala
+    </div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{{ mes_label }}</h1>
+  </div>
+  <div class="flex items-center gap-2 self-start sm:self-auto">
+    <a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/calendario?mes={{ mes_anterior }}">
+      <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+      </svg>
+      Mês anterior
+    </a>
+    <a class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-lg transition" href="/calendario">Hoje</a>
+    <a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/calendario?mes={{ mes_seguinte }}">
+      Mês seguinte
+      <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+      </svg>
+    </a>
+  </div>
+</div>
+
+<!-- Mini resumo do mês -->
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
+    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Dias com ponto</span>
+    <span class="block mt-1 text-2xl font-extrabold text-slate-900 font-mono-numbers">{{ stats.pontos }}</span>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
+    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Extras no mês</span>
+    <span class="block mt-1 text-2xl font-extrabold text-emerald-600 font-mono-numbers">{% if db_erro %}—{% else %}{{ stats.extras|hhmm }}{% endif %}</span>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
+    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Folgas ganhas</span>
+    <span class="block mt-1 text-2xl font-extrabold text-sky-600 font-mono-numbers">{{ stats.folgas }}</span>
+    {% if ciclo_ativo and stats.sem_ponto %}
+      <span class="mt-1 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 self-start">{{ stats.sem_ponto }} dia(s) de escala sem ponto</span>
+    {% endif %}
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
+    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Compensações/abonos</span>
+    <span class="block mt-1 text-2xl font-extrabold text-teal-600 font-mono-numbers">{{ stats.comps }}</span>
+  </div>
+</section>
+
+<!-- Calendário -->
+<section class="bg-white rounded-2xl border border-slate-200 shadow-subtle overflow-hidden">
+  <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+      <h2 class="text-base font-bold text-slate-900">Calendário de {{ mes_label }}</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Cada dia mostra o que foi lançado — pontos, extras, folgas e compensações</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-3 text-[10.5px] text-slate-600">
+      <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></span> Trabalhado + extras</span>
+      <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-sky-100 border border-sky-300"></span> Ganhou folga</span>
+      <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-teal-100 border border-teal-300"></span> Compensado/abonado</span>
+      <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-amber-100 border border-amber-300"></span> Feriado</span>
+      <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-rose-50 border border-rose-300"></span> Fim de semana</span>
+      {% if ciclo_ativo %}
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-amber-100 border border-amber-400"></span> Escala sem ponto</span>
+        <span class="inline-flex items-center gap-1.5 text-sky-700"><span class="w-2.5 h-2.5 rounded bg-sky-100 border border-sky-300"></span> Descanso do ciclo</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <div class="min-w-[700px]">
+      <!-- Cabeçalho dos dias da semana -->
+      <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/70 text-slate-600 font-semibold text-[11px] uppercase tracking-wider">
+        {% for nome in ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'] %}
+          <div class="py-3 text-center">{{ nome }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Grade de dias -->
+      <div class="grid grid-cols-7 gap-px bg-slate-100">
+        {% for c in celulas %}
+          {% if c.vazio %}
+            <div class="bg-slate-50/40 min-h-[108px]"></div>
+          {% else %}
+            <div class="bg-white p-2 min-h-[108px] relative
+              {{ 'bg-amber-50/60' if c.feriado else ('bg-rose-50/40' if c.fds else '') }}
+              {{ (not c.tem and not c.feriado) and 'text-slate-400' or '' }}
+              {{ 'ring-2 ring-inset ring-emerald-500/70' if c.iso == hoje_iso else '' }}">
+              <div class="flex items-start justify-between gap-1">
+                <span class="{{ 'text-xs font-bold font-mono-numbers ' + ('text-slate-400 bg-slate-100 rounded-full w-5 h-5 flex items-center justify-center' if not c.tem and not c.feriado else 'text-slate-900') }}">{{ c.dia }}</span>
+                {% if c.feriado %}
+                  <span class="text-[9px] font-semibold text-amber-700 bg-amber-100/90 px-1 py-0.5 rounded truncate max-w-[64px]" title="{{ c.feriado }}">{{ c.feriado }}</span>
+                {% elif not c.tem and c.escala == 'trabalho' %}
+                  <span class="text-[9px] font-semibold text-amber-800 bg-amber-100/90 px-1 py-0.5 rounded" title="Dia de escala sem ponto lançado">sem ponto</span>
+                {% endif %}
+              </div>
+
+              {% if not c.tem and c.escala == 'descanso' %}
+                <div class="mt-1.5 text-[10px] font-semibold text-sky-700 bg-sky-100/80 rounded px-1.5 py-1">descanso (escala)</div>
+              {% endif %}
+
+              {% for p in c.pontos %}
+                <div class="mt-1.5 bg-white/80 border border-slate-200 rounded-lg px-1.5 py-1">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="text-[11px] font-mono-numbers font-bold text-emerald-700">{{ p.total }}</span>
+                    {% if p.extras %}<span class="text-[9px] font-bold font-mono-numbers bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded">+{{ p.extras }}</span>{% endif %}
+                  </div>
+                  <div class="text-[10px] text-slate-500 font-mono-numbers">{{ p.entrada }}–{{ p.saida }}</div>
+                  <div class="flex flex-wrap gap-1 mt-0.5">
+                    {% if p.folga %}<span class="text-[9px] font-semibold bg-sky-100 text-sky-700 px-1 py-0.5 rounded">+1 folga</span>{% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+
+              {% for cp in c.comps %}
+                <div class="mt-1.5 bg-teal-50/80 border border-teal-200 rounded-lg px-1.5 py-1">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="text-[10px] font-semibold text-teal-800">{{ cp.status }}</span>
+                    <span class="text-[10px] font-mono-numbers font-bold text-teal-700">{{ cp.mov }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
+    <span>O dia marcado com ◻︎ verde é <strong>hoje</strong>. Passe o mouse no nome do feriado para ver completo.</span>
+    <span>Balanço geral: <strong class="font-mono-numbers">{{ stats.extras|hhmm if not db_erro else '—' }} extras no mês</strong></span>
+  </div>
+</section>
+
+{% endblock %}

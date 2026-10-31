@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% block titulo %}Dashboard · Escala &amp; Banco de Horas{% endblock %}
+{% block conteudo %}
+
+{% macro icone_lapis() %}
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+  <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+{% endmacro %}
+{% macro icone_lixeira() %}
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+{% endmacro %}
+
+<!-- Barra de período -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 bg-white p-4 rounded-xl border border-slate-200/90 shadow-subtle">
+  <div>
+    <div class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-0.5 uppercase tracking-wider">
+      <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+      </svg>
+      Período Contábil Ativo
+    </div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{{ mes_label }}</h1>
+  </div>
+  <div class="flex items-center gap-2 self-start sm:self-auto">
+    <a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/dashboard?mes={{ mes_anterior }}">
+      <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+      </svg>
+      Mês anterior
+    </a>
+    <a class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-lg transition" href="/dashboard">Hoje</a>
+    <a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/dashboard?mes={{ mes_seguinte }}">
+      Mês seguinte
+      <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+        <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+      </svg>
+    </a>
+  </div>
+</div>
+
+<!-- Cards de indicadores -->
+<section aria-label="Indicadores" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+    <div class="absolute top-0 left-0 right-0 h-1 {{ 'bg-emerald-500' if saldo_positivo else 'bg-rose-500' }}"></div>
+    <div class="flex items-start justify-between">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Saldo Banco de Horas</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold font-mono-numbers tracking-tight {{ 'text-emerald-600' if saldo_positivo else 'text-rose-600' }}">{{ saldo_min|hhmm }}</span>
+          <span class="text-xs font-medium {{ 'text-emerald-700 bg-emerald-50 border border-emerald-200' if saldo_positivo else 'text-rose-700 bg-rose-50 border border-rose-200' }} px-1.5 py-0.5 rounded">{{ 'Crédito' if saldo_positivo else 'Débito' }}</span>
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl {{ 'bg-emerald-50 text-emerald-600' if saldo_positivo else 'bg-rose-50 text-rose-600' }} flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <span>Banco acumulado (todo histórico):</span>
+      <span class="font-medium text-slate-700 font-mono-numbers">{{ saldo_min|hhmm }}</span>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+    <div class="absolute top-0 left-0 right-0 h-1 {{ 'bg-sky-500' if folgas >= 0 else 'bg-rose-500' }}"></div>
+    <div class="flex items-start justify-between">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Folgas Disponíveis</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-slate-900 font-mono-numbers tracking-tight">{{ folgas }}</span>
+          <span class="text-xs text-slate-500">{{ 'dias disponíveis' if folgas != 1 else 'dia disponível' }}</span>
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl {{ 'bg-sky-50 text-sky-600' if folgas >= 0 else 'bg-rose-50 text-rose-600' }} flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <span>Geradas em:</span>
+      <span class="font-medium text-sky-700">feriados e fins de semana</span>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+    <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
+    <div class="flex items-start justify-between">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Horas Extras no Mês</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-slate-900 font-mono-numbers tracking-tight">{{ extras_mes|hhmm }}</span>
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <span>Soma das extras dos pontos deste mês</span>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
+    <div class="absolute top-0 left-0 right-0 h-1 bg-amber-500"></div>
+    <div class="flex items-start justify-between">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Jornada Base/Dia</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold text-slate-900 font-mono-numbers tracking-tight">{{ jornada_min|hhmm }}</span>
+          <a class="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded hover:bg-amber-100" href="/configuracoes">Configurar</a>
+        </div>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <span>Fator fds/feriado:</span>
+      <span class="font-medium text-slate-700 font-mono-numbers">{{ fator_especial }}x</span>
+    </div>
+  </div>
+</section>
+
+<!-- Painéis de lançamento -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+
+  <!-- Painel 1: ponto -->
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-6" id="painel-registro">
+    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Novo registro de ponto</h2>
+          <p class="text-xs text-slate-500">Lance entradas, saídas e intervalos da sua jornada</p>
+        </div>
+      </div>
+      <button class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100/70 border border-emerald-200/80 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1.5" id="btn-agora" type="button">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        Agora (hora atual)
+      </button>
+    </div>
+
+    <form action="/registros" class="space-y-4" method="post">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-data">Data</label>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-data" name="data" type="date" value="{{ hoje }}"/>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-entrada">Entrada</label>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-entrada" name="entrada" type="time" value="08:00"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-saida">Saída <span class="text-[11px] font-normal text-slate-500 ml-1">(suporta pós meia-noite)</span></label>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-saida" name="saida" type="time" value="19:00"/>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-pausa">Pausa / Almoço (min)</label>
+          <div class="relative">
+            <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3 pr-14" id="ponto-pausa" min="0" name="pausa_min" step="5" type="number" value="0"/>
+            <span class="absolute right-3 top-2 text-xs text-slate-400 pointer-events-none">minutos</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-obs">Observação <span class="text-slate-400 font-normal">(opcional)</span></label>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs placeholder-slate-400 py-2 px-3" id="ponto-obs" name="observacao" placeholder="Ex: autorizada pela gerência, troca de turno..." type="text"/>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200/80 rounded-lg p-3 text-xs flex items-center justify-between text-slate-600">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Horas líquidas: <strong class="font-mono-numbers text-slate-800" id="prev-total">—</strong>
+        </span>
+        <span class="text-slate-500">Extras estimadas (dia útil): <strong class="font-mono-numbers text-emerald-700" id="prev-extras">—</strong></span>
+      </div>
+
+      <div class="pt-2">
+        <button class="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors" type="submit">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+          Salvar registro
+        </button>
+      </div>
+    </form>
+
+    <p class="mt-4 pt-3 border-t border-slate-100 text-[11.5px] text-slate-500 leading-relaxed">
+      <span class="font-semibold text-slate-700">Dica automática:</span> lance a saída e o sistema contabiliza as horas extras na hora. Turnos que passam da meia-noite são detectados automaticamente.
+    </p>
+  </section>
+
+  <!-- Painel 2: compensação -->
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-6" id="painel-compensacao">
+    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="p-2 rounded-lg bg-teal-50 text-teal-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Compensação / Abono / Folga</h2>
+          <p class="text-xs text-slate-500">Debite dias do banco ou use suas folgas</p>
+        </div>
+      </div>
+      <span class="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-slate-100 text-slate-700">Ajuste Rápido</span>
+    </div>
+
+    <form action="/compensacoes" class="space-y-4" method="post">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-data">Data</label>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs font-mono-numbers py-2 px-3" id="comp-data" name="data" type="date" value="{{ hoje }}"/>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-tipo">Tipo de Movimentação</label>
+          <select class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs py-2 px-3 text-slate-800" id="comp-tipo" name="tipo">
+            <option value="compensacao">Compensar dia (−jornada do banco)</option>
+            <option value="abono">Abono de horas (−minutos)</option>
+            <option value="folga">Usar folga (−1 folga)</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-minutos">Minutos <span class="text-slate-400 font-normal">(apenas para abono)</span></label>
+          <div class="relative">
+            <input class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs font-mono-numbers py-2 px-3 pr-14" id="comp-minutos" min="0" name="horas_min" step="10" type="number" value="0"/>
+            <span class="absolute right-3 top-2 text-xs text-slate-400 pointer-events-none">minutos</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-obs">Observação <span class="text-slate-400 font-normal">(opcional)</span></label>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs placeholder-slate-400 py-2 px-3" id="comp-obs" name="observacao" placeholder="Ex: referente ao plantão de feriado do dia 12" type="text"/>
+        </div>
+      </div>
+
+      <div class="bg-teal-50/70 border border-teal-200/80 rounded-lg p-3 text-xs text-teal-800 flex items-center justify-between">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-teal-600 shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+          Impacto no saldo: <strong class="font-mono-numbers text-teal-900" id="impacto-comp">-</strong>
+        </span>
+        <span class="text-[11px] font-semibold text-teal-700 bg-white border border-teal-200 px-2 py-0.5 rounded">Débito Seguro</span>
+      </div>
+
+      <div class="pt-2">
+        <button class="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors" type="submit">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+          Lançar compensação
+        </button>
+      </div>
+    </form>
+
+    <p class="mt-4 pt-3 border-t border-slate-100 text-[11.5px] text-slate-500 leading-relaxed">
+      <span class="font-semibold text-slate-700">Regra de cálculo:</span> compensar significa descontar a jornada base ({{ jornada_min|hhmm }}). Abono desconta os minutos digitados. Folga consome 1 crédito comprado em feriado/fim de semana.
+    </p>
+  </section>
+</div>
+
+<!-- Histórico -->
+<section class="bg-white rounded-2xl border border-slate-200 shadow-subtle overflow-hidden">
+  <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-50/50">
+    <div>
+      <h2 class="text-base font-bold text-slate-900">Histórico de {{ mes_label }}</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Pontos, compensações e folgas do período</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2.5">
+      <div class="inline-flex rounded-lg bg-slate-200/70 p-0.5 text-xs font-medium text-slate-600" id="abas-filtro">
+        <button class="bg-white text-slate-900 shadow-xs px-3 py-1.5 rounded-md font-semibold" data-filtro="todos" type="button">Todos ({{ linhas|length }})</button>
+        <button class="hover:text-slate-900 px-3 py-1.5 rounded-md transition" data-filtro="extras" type="button">Horas Extras ({{ n_extras }})</button>
+        <button class="hover:text-slate-900 px-3 py-1.5 rounded-md transition" data-filtro="comp" type="button">Compensações ({{ n_comp }})</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-600 font-semibold">
+          <th class="py-3.5 pl-6 pr-3" scope="col">Data</th>
+          <th class="px-3 py-3.5" scope="col">Dia da Semana</th>
+          <th class="px-3 py-3.5" scope="col">Entrada</th>
+          <th class="px-3 py-3.5" scope="col">Intervalo</th>
+          <th class="px-3 py-3.5" scope="col">Saída</th>
+          <th class="px-3 py-3.5" scope="col">Total Líquido</th>
+          <th class="px-3 py-3.5" scope="col">Saldo / Movimento</th>
+          <th class="px-3 py-3.5" scope="col">Status</th>
+          <th class="pr-6 pl-3 py-3.5 text-right" scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200/70 text-slate-700">
+        {% for l in linhas %}
+        <tr class="hover:bg-slate-50/60 transition {{ 'bg-teal-50/20' if l.tipo == 'compensacao' else '' }}" data-extras="{{ '1' if (l.tipo == 'ponto' and l.tem_extra) else '0' }}" data-kind="{{ 'ponto' if l.tipo == 'ponto' else 'comp' }}">
+          <td class="py-4 pl-6 pr-3 font-semibold text-slate-900 font-mono-numbers">{{ l.data }}</td>
+          <td class="px-3 py-4 text-slate-500">
+            {{ l.dia }}
+            {% if l.tipo == 'ponto' and l.etiqueta == 'feriado' %}<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">feriado</span>
+            {% elif l.tipo == 'ponto' and l.etiqueta == 'fds' %}<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">fim de semana</span>
+            {% elif l.tipo == 'ponto' and l.etiqueta == 'escala' %}<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">escala</span>
+            {% elif l.tipo == 'ponto' and l.etiqueta == 'descanso' %}<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">trabalhou no descanso</span>{% endif %}
+            {% if l.tipo == 'ponto' and l.folga %}<span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">+1 folga</span>{% endif %}
+          </td>
+          {% if l.tipo == 'ponto' %}
+            <td class="px-3 py-4 font-mono-numbers text-slate-800">{{ l.entrada }}</td>
+            <td class="px-3 py-4 font-mono-numbers text-slate-600">{{ l.pausa }}</td>
+            <td class="px-3 py-4 font-mono-numbers text-slate-800">{{ l.saida }}</td>
+            <td class="px-3 py-4 font-mono-numbers font-medium text-slate-900">{{ l.total }}</td>
+          {% else %}
+            <td class="px-3 py-4 text-slate-400 italic">--:--</td>
+            <td class="px-3 py-4 text-slate-400 italic">--:--</td>
+            <td class="px-3 py-4 text-slate-400 italic">--:--</td>
+            <td class="px-3 py-4 font-mono-numbers font-medium text-teal-800">{{ l.rotulo }}</td>
+          {% endif %}
+          <td class="px-3 py-4">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold font-mono-numbers {{ 'bg-slate-100 text-slate-700' if l.tipo == 'ponto' and not l.tem_extra else ('bg-emerald-50 text-emerald-700' if l.tipo == 'ponto' else 'bg-rose-50 text-rose-700') }}">
+              {{ l.mov }}
+            </span>
+          </td>
+          <td class="px-3 py-4">
+            {% if l.tipo == 'ponto' %}
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Registrado
+              </span>
+              {% if l.obs %}<span class="block mt-1 text-[10.5px] text-slate-500 max-w-[220px] truncate" title="{{ l.obs }}">{{ l.obs }}</span>{% endif %}
+            {% else %}
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> {{ l.status }}
+              </span>
+              {% if l.obs %}<span class="block mt-1 text-[10.5px] text-slate-500 max-w-[220px] truncate" title="{{ l.obs }}">{{ l.obs }}</span>{% endif %}
+            {% endif %}
+          </td>
+          <td class="pr-6 pl-3 py-4 text-right">
+            <div class="inline-flex items-center gap-1.5 text-slate-400">
+              {% if l.tipo == 'ponto' %}
+                <a class="p-1 hover:text-slate-700 rounded transition" href="/registros/{{ l.id }}" title="Editar registro">{{ icone_lapis() }}</a>
+                <form action="/registros/{{ l.id }}/excluir" method="post" onsubmit="return confirm('Excluir o registro de {{ l.data }}?')">
+                  <button type="submit" class="p-1 hover:text-rose-600 rounded transition" title="Excluir">{{ icone_lixeira() }}</button>
+                </form>
+              {% else %}
+                <form action="/compensacoes/{{ l.id }}/excluir" method="post" onsubmit="return confirm('Excluir o lançamento de {{ l.data }}?')">
+                  <button type="submit" class="p-1 hover:text-rose-600 rounded transition" title="Excluir">{{ icone_lixeira() }}</button>
+                </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not linhas %}
+        <tr><td class="py-10 text-center text-slate-400 italic" colspan="9">Nenhum lançamento neste mês — registre o primeiro ponto acima ☝️</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
+    <div class="flex items-center gap-4">
+      <span>Dias com ponto: <strong class="text-slate-900 font-mono-numbers">{{ dias_count }}</strong></span>
+      <span class="hidden sm:inline text-slate-300">•</span>
+      <span>Horas trabalhadas: <strong class="text-slate-900 font-mono-numbers">{{ total_horas_trab }}</strong></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>Balanço do banco de horas:</span>
+      <span class="px-2 py-0.5 font-mono-numbers font-bold rounded {{ 'bg-emerald-100 text-emerald-800' if saldo_positivo else 'bg-rose-100 text-rose-800' }}">{{ saldo_min|hhmm }} Saldo Atual</span>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const JMIN = {{ jornada_min }};
+  const FATOR = {{ fator_util or 1 }};
+
+  function paraMin(v) { if (!v) return 0; const [h, m] = v.split(':').map(Number); return (h || 0) * 60 + (m || 0); }
+  function fmt(m) { const neg = m < 0 ? '-' : ''; m = Math.abs(Math.round(m)); return neg + String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+  function $id(x) { return document.getElementById(x); }
+
+  // Prévia de cálculo do ponto
+  function calcularPrev() {
+    const ent = paraMin($id('ponto-entrada').value), sai = paraMin($id('ponto-saida').value);
+    let dur = sai - ent; if (dur <= 0) dur += 1440;
+    dur = Math.max(0, dur - (parseInt($id('ponto-pausa').value) || 0));
+    const extras = Math.max(0, Math.round((dur - JMIN) * FATOR));
+    $id('prev-total').textContent = Math.floor(dur / 60) + 'h ' + (dur % 60) + 'm';
+    $id('prev-extras').textContent = fmt(extras);
+  }
+
+  // Impacto da compensação
+  function impacto() {
+    const tipo = $id('comp-tipo').value;
+    if (tipo === 'compensacao') $id('impacto-comp').textContent = '-' + fmt(JMIN) + ' (Jornada Integral)';
+    else if (tipo === 'abono') $id('impacto-comp').textContent = '-' + fmt(parseInt($id('comp-minutos').value) || 0) + ' (Minutos Abonados)';
+    else $id('impacto-comp').textContent = '-1 folga (dia inteiro)';
+  }
+
+  // Botão "Agora": preenche a saída com a hora atual
+  $id('btn-agora').addEventListener('click', () => {
+    const d = new Date();
+    $id('ponto-saida').value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    calcularPrev();
+  });
+
+  ['ponto-data','ponto-entrada','ponto-saida','ponto-pausa'].forEach(i => $id(i).addEventListener('input', calcularPrev));
+  ['comp-tipo','comp-minutos'].forEach(i => $id(i).addEventListener('input', impacto));
+  $id('comp-tipo').addEventListener('change', impacto);
+  calcularPrev(); impacto();
+
+  // Filtros do histórico
+  document.querySelectorAll('#abas-filtro button').forEach(botao => {
+    botao.addEventListener('click', () => {
+      document.querySelectorAll('#abas-filtro button').forEach(b => b.className = 'hover:text-slate-900 px-3 py-1.5 rounded-md transition');
+      botao.className = 'bg-white text-slate-900 shadow-xs px-3 py-1.5 rounded-md font-semibold';
+      const filtro = botao.dataset.filtro;
+      document.querySelectorAll('tr[data-kind]').forEach(tr => {
+        const ok = filtro === 'todos'
+          || (filtro === 'extras' && tr.dataset.extras === '1')
+          || (filtro === 'comp' && tr.dataset.kind === 'comp');
+        tr.style.display = ok ? '' : 'none';
+      });
+    });
+  });
+</script>
+{% endblock %}

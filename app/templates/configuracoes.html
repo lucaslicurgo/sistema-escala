@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block titulo %}Configurações · Escala &amp; Banco de Horas{% endblock %}
+{% block conteudo %}
+
+<section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-6 mb-8">
+  <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+    <div class="flex items-center gap-2.5">
+      <div class="p-2 rounded-lg bg-amber-50 text-amber-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-900">Regras do Banco de Horas</h2>
+        <p class="text-xs text-slate-500">Calcule do jeito que combinem os acordos — mude aqui quando quiser</p>
+      </div>
+    </div>
+    <span class="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-slate-100 text-slate-700">Aplica no histórico todo</span>
+  </div>
+
+  <form action="/configuracoes" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="post">
+    <!-- Mantém os valores do ciclo intactos quando só as regras forem salvas -->
+    <input type="hidden" name="ciclo_ativo" value="{{ config['ciclo_ativo']|default('nao') }}"/>
+    <input type="hidden" name="ciclo_trabalha" value="{{ config['ciclo_trabalha']|default('4') }}"/>
+    <input type="hidden" name="ciclo_folga" value="{{ config['ciclo_folga']|default('2') }}"/>
+    <input type="hidden" name="ciclo_referencia" value="{{ config['ciclo_referencia']|default('') }}"/>
+    <input type="hidden" name="fds_no_ciclo_dobra" value="{{ config['fds_no_ciclo_dobra']|default('nao') }}"/>
+    <div>
+      <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-jornada">Jornada base/dia</label>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="cfg-jornada" name="jornada_diaria" placeholder="10:00" required type="text" value="{{ config['jornada_diaria'] }}"/>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-fator-esp">Fator fim de semana/feriado</label>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="cfg-fator-esp" name="fator_especial" placeholder="2" required type="text" value="{{ config['fator_especial'] }}"/>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-fator-util">Fator dia útil (excedente)</label>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="cfg-fator-util" name="fator_util" placeholder="1" required type="text" value="{{ config['fator_util'] }}"/>
+    </div>
+    <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer shadow-xs">
+      <input class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300" name="folga_fds_feriado" type="checkbox" value="sim"
+        {{ 'checked' if (config['folga_fds_feriado']|default('sim')) in ('sim','s','1','true') }}/>
+      <span class="text-xs font-semibold text-slate-700">Trabalhar fim de semana/feriado gera +1 folga</span>
+    </label>
+    <div class="sm:col-span-2 pt-2">
+      <button class="inline-flex justify-center items-center gap-2 py-2.5 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors" type="submit">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        Salvar regras
+      </button>
+    </div>
+  </form>
+
+  <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-xs text-slate-600 leading-relaxed mt-5">
+    <p class="mt-0"><span class="font-semibold text-slate-700">Dia útil:</span> tudo acima da jornada base ({{ config['jornada_diaria'] }}) vira hora extra × <span class="font-mono-numbers">{{ config['fator_util'] }}</span>.</p>
+    <p class="mt-1"><span class="font-semibold text-slate-700">Fim de semana/feriado:</span> todas as horas contam como extra × <span class="font-mono-numbers">{{ config['fator_especial'] }}</span> (1h = 2h de crédito), e o dia ainda gera folga se ativado.</p>
+  </div>
+</section>
+
+<section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-6 mb-8">
+  <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+    <div class="flex items-center gap-2.5">
+      <div class="p-2 rounded-lg bg-indigo-50 text-indigo-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zm4-7h6m-6 3h3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-900">Minha escala (ciclo)</h2>
+        <p class="text-xs text-slate-500">Ex.: 4x2 — trabalha 4 dias seguidos, DESCANSO 2, girando a semana</p>
+      </div>
+    </div>
+    <span class="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium {{ 'bg-emerald-100 text-emerald-800' if ciclo_ativo else 'bg-slate-100 text-slate-700' }}">
+      {{ 'Ciclo ATIVO' if ciclo_ativo else 'Ciclo desligado' }}
+    </span>
+  </div>
+
+  <form action="/configuracoes" class="space-y-4" method="post">
+    <input name="jornada_diaria" type="hidden" value="{{ config['jornada_diaria'] }}"/>
+    <input name="fator_util" type="hidden" value="{{ config['fator_util'] }}"/>
+    <input name="fator_especial" type="hidden" value="{{ config['fator_especial'] }}"/>
+    <input name="folga_fds_feriado" type="hidden" value="{{ config['folga_fds_feriado'] }}"/>
+
+    <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer shadow-xs">
+      <input {{ 'checked' if (config['ciclo_ativo']|default('nao')) in ('sim','s','1','true') }} class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300" name="ciclo_ativo" type="checkbox" value="sim"/>
+      <span class="text-xs font-semibold text-slate-700">Ciclo de escala ativo (descansos e dias de escala calculados pelo sistema)</span>
+    </label>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cic-trabalha">Dias seguidos trabalhando</label>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2 px-3" id="cic-trabalha" min="1" name="ciclo_trabalha" required type="number" value="{{ config['ciclo_trabalha'] }}"/>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cic-folga">Dias seguidos de descanso</label>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2 px-3" id="cic-folga" min="0" name="ciclo_folga" required type="number" value="{{ config['ciclo_folga'] }}"/>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cic-ref">1º dia trabalhado de um ciclo</label>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2 px-3" id="cic-ref" name="ciclo_referencia" type="date" value="{{ config['ciclo_referencia'] }}"/>
+      </div>
+    </div>
+
+    <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer shadow-xs">
+      <input {{ 'checked' if (config['fds_no_ciclo_dobra']|default('nao')) in ('sim','s','1','true') }} class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300" name="fds_no_ciclo_dobra" type="checkbox" value="sim"/>
+      <span class="text-xs font-semibold text-slate-700">Dobrar fim de semana <u>dentro</u> da escala (padrão: não — o sábado/domingo do ciclo é dia normal)</span>
+    </label>
+
+    {% if ciclo_ativo and ciclo_exemplo %}
+    <div class="bg-indigo-50/60 border border-indigo-200/80 rounded-lg p-3">
+      <p class="text-xs font-semibold text-indigo-900 mb-2">Próximos dias segundo o ciclo:</p>
+      <div class="flex flex-wrap gap-1.5">
+        {% for e in ciclo_exemplo %}
+          <span class="text-[10.5px] font-mono-numbers px-1.5 py-1 rounded {{ 'bg-emerald-100 text-emerald-800' if e.status == 'trabalho' else 'bg-sky-100 text-sky-800' }}" title="{{ 'trabalha' if e.status == 'trabalho' else 'descansa' }}">
+            {{ e.data }} · {{ e.sigla }}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="pt-2">
+      <button class="inline-flex justify-center items-center gap-2 py-2.5 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors" type="submit">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+        Salvar escala
+      </button>
+    </div>
+  </form>
+
+  <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-xs text-slate-600 leading-relaxed mt-5">
+    <p class="mt-0"><span class="font-semibold text-slate-700">Como configurar o 4x2:</span> escolha um dia em que você <u>começou</u> um bloco de trabalho (ex.: a última segunda que você voltou de folga) e marque como "1º dia trabalhado". O sistema repete o padrão (4 trab. → 2 DESCANSO) daqui para a frente e para trás (a matemática cuida de datas passadas).</p>
+    <p class="mt-1"><span class="font-semibold text-slate-700">O que muda:</span> dia de escala conta jornada normal (excedente = extra); feriado SEMPRE dobra + folga; trabalhando no seu dia de descanso, tudo vira extra em dobro. O calendário marca os descansos e mostra "SEM PONTO" quando faltar lançamento.</p>
+  </div>
+</section>
+
+<section class="bg-white rounded-2xl border border-slate-200 shadow-subtle overflow-hidden">
+  <div class="p-5 border-b border-slate-200 bg-slate-50/50">
+    <div class="flex items-center gap-2.5">
+      <div class="p-2 rounded-lg bg-rose-50 text-rose-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-900">Feriados</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Datas contadas como feriado para o cálculo de horas</p>
+      </div>
+    </div>
+  </div>
+
+  <form action="/feriados" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end p-5 border-b border-slate-100" method="post">
+    <div>
+      <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="fer-data">Data</label>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="fer-data" name="data" required type="date"/>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="fer-nome">Nome</label>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs placeholder-slate-400 py-2 px-3" id="fer-nome" name="nome" placeholder="Ex.: Natal" required type="text"/>
+    </div>
+    <button class="inline-flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors" type="submit">
+      Adicionar feriado
+    </button>
+  </form>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-600 font-semibold">
+          <th class="py-3.5 pl-6 pr-3" scope="col">Data</th>
+          <th class="px-3 py-3.5" scope="col">Nome</th>
+          <th class="pr-6 pl-3 py-3.5 text-right" scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200/70 text-slate-700">
+        {% for f in feriados %}
+        <tr class="hover:bg-slate-50/60 transition">
+          <td class="py-3.5 pl-6 pr-3 font-semibold text-slate-900 font-mono-numbers">{{ f.data }}</td>
+          <td class="px-3 py-3.5">{{ f.nome }}</td>
+          <td class="pr-6 pl-3 py-3.5 text-right">
+            <div class="inline-flex items-center text-slate-400">
+              <form action="/feriados/{{ f.id }}/excluir" method="post" onsubmit="return confirm('Excluir o feriado {{ f.nome }}?')">
+                <button type="submit" class="p-1 hover:text-rose-600 rounded transition" title="Excluir">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not feriados %}
+        <tr><td class="py-8 text-center text-slate-400 italic" colspan="3">Nenhum feriado cadastrado.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}
