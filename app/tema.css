@@ -2,3 +2,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* No celular, campos com fonte < 16px fazem o iOS dar zoom ao focar */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
+}
+
+/* Rede de segurança: nada empurra a página para os lados no celular */
+html, body { overflow-x: clip; max-width: 100%; }

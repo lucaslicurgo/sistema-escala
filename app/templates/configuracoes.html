@@ -3,7 +3,7 @@
 {% block conteudo %}
 
 <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6 mb-8">
-  <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+  <div class="flex items-start sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
     <div class="flex items-center gap-2.5">
       <div class="p-2 rounded-lg bg-amber-50 text-amber-700">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
@@ -16,7 +16,7 @@
         <p class="text-xs text-slate-500">Calcule do jeito que combinem os acordos — mude aqui quando quiser</p>
       </div>
     </div>
-    <span class="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-slate-100 text-slate-700">Aplica no histórico todo</span>
+    <span class="hidden sm:inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-slate-100 text-slate-700">Aplica no histórico todo</span>
   </div>
 
   <form action="/configuracoes" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="post">
@@ -28,15 +28,15 @@
     <input type="hidden" name="fds_no_ciclo_dobra" value="{{ config['fds_no_ciclo_dobra']|default('nao') }}"/>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-jornada">Jornada base/dia</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="cfg-jornada" name="jornada_diaria" placeholder="10:00" required type="text" value="{{ config['jornada_diaria'] }}"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-jornada" name="jornada_diaria" placeholder="10:00" required type="text" value="{{ config['jornada_diaria'] }}"/>
     </div>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-fator-esp">Fator fim de semana/feriado</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="cfg-fator-esp" name="fator_especial" placeholder="2" required type="text" value="{{ config['fator_especial'] }}"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-fator-esp" name="fator_especial" placeholder="2" required type="text" value="{{ config['fator_especial'] }}"/>
     </div>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-fator-util">Fator dia útil (excedente)</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="cfg-fator-util" name="fator_util" placeholder="1" required type="text" value="{{ config['fator_util'] }}"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-fator-util" name="fator_util" placeholder="1" required type="text" value="{{ config['fator_util'] }}"/>
     </div>
     <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer shadow-xs">
       <input class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300" name="folga_fds_feriado" type="checkbox" value="sim"
@@ -44,7 +44,7 @@
       <span class="text-xs font-semibold text-slate-700">Trabalhar fim de semana/feriado gera +1 folga</span>
     </label>
     <div class="sm:col-span-2 pt-2">
-      <button class="inline-flex justify-center items-center gap-2 py-2.5 px-4 sm:px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors" type="submit">
+      <button class="w-full sm:w-auto inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 sm:px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors" type="submit">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
           <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
@@ -60,7 +60,7 @@
 </section>
 
 <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6 mb-8">
-  <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+  <div class="flex items-start sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
     <div class="flex items-center gap-2.5">
       <div class="p-2 rounded-lg bg-indigo-50 text-indigo-700">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
@@ -72,7 +72,7 @@
         <p class="text-xs text-slate-500">Ex.: 4x2 — trabalha 4 dias seguidos, DESCANSO 2, girando a semana</p>
       </div>
     </div>
-    <span class="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium {{ 'bg-emerald-100 text-emerald-800' if ciclo_ativo else 'bg-slate-100 text-slate-700' }}">
+    <span class="inline-flex shrink-0 items-center px-2 py-1 rounded text-[11px] font-medium {{ 'bg-emerald-100 text-emerald-800' if ciclo_ativo else 'bg-slate-100 text-slate-700' }}">
       {{ 'Ciclo ATIVO' if ciclo_ativo else 'Ciclo desligado' }}
     </span>
   </div>
@@ -91,15 +91,15 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cic-trabalha">Dias seguidos trabalhando</label>
-        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2 px-3" id="cic-trabalha" min="1" name="ciclo_trabalha" required type="number" value="{{ config['ciclo_trabalha'] }}"/>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cic-trabalha" min="1" name="ciclo_trabalha" required type="number" value="{{ config['ciclo_trabalha'] }}"/>
       </div>
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cic-folga">Dias seguidos de descanso</label>
-        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2 px-3" id="cic-folga" min="0" name="ciclo_folga" required type="number" value="{{ config['ciclo_folga'] }}"/>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cic-folga" min="0" name="ciclo_folga" required type="number" value="{{ config['ciclo_folga'] }}"/>
       </div>
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cic-ref">1º dia trabalhado de um ciclo</label>
-        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2 px-3" id="cic-ref" name="ciclo_referencia" type="date" value="{{ config['ciclo_referencia'] }}"/>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cic-ref" name="ciclo_referencia" type="date" value="{{ config['ciclo_referencia'] }}"/>
       </div>
     </div>
 
@@ -122,7 +122,7 @@
     {% endif %}
 
     <div class="pt-2">
-      <button class="inline-flex justify-center items-center gap-2 py-2.5 px-4 sm:px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors" type="submit">
+      <button class="w-full sm:w-auto inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 sm:px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors" type="submit">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
           <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
@@ -155,11 +155,11 @@
   <form action="/feriados" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end p-4 sm:p-5 border-b border-slate-100" method="post">
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="fer-data">Data</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="fer-data" name="data" required type="date"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="fer-data" name="data" required type="date"/>
     </div>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="fer-nome">Nome</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs placeholder-slate-400 py-2 px-3" id="fer-nome" name="nome" placeholder="Ex.: Natal" required type="text"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs placeholder-slate-400 py-2.5 sm:py-2 px-3" id="fer-nome" name="nome" placeholder="Ex.: Natal" required type="text"/>
     </div>
     <button class="inline-flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors" type="submit">
       Adicionar feriado

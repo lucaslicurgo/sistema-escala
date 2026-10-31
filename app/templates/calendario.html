@@ -3,9 +3,9 @@
 {% block conteudo %}
 
 <!-- Barra de período -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 bg-white p-4 rounded-xl border border-slate-200/90 shadow-subtle">
+<div class="flex items-center justify-between gap-3 mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded-xl border border-slate-200/90 shadow-subtle">
   <div>
-    <div class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-0.5 uppercase tracking-wider">
+    <div class="flex items-center gap-2 text-[10px] sm:text-xs font-medium text-slate-500 mb-0.5 uppercase tracking-wider">
       <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
       </svg>
@@ -13,16 +13,16 @@
     </div>
     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{{ mes_label }}</h1>
   </div>
-  <div class="flex items-center gap-2 self-start sm:self-auto">
-    <a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/calendario?mes={{ mes_anterior }}">
+  <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+    <a aria-label="Mês anterior" class="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/calendario?mes={{ mes_anterior }}">
       <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
       </svg>
-      Mês anterior
+      <span class="hidden sm:inline">Mês anterior</span>
     </a>
-    <a class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-lg transition" href="/calendario">Hoje</a>
-    <a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/calendario?mes={{ mes_seguinte }}">
-      Mês seguinte
+    <a class="px-3 py-2 sm:py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-lg transition" href="/calendario">Hoje</a>
+    <a aria-label="Mês seguinte" class="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/calendario?mes={{ mes_seguinte }}">
+      <span class="hidden sm:inline">Mês seguinte</span>
       <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
       </svg>
@@ -31,36 +31,36 @@
 </div>
 
 <!-- Mini resumo do mês -->
-<section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
-    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Dias com ponto</span>
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-subtle">
+    <span class="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 leading-tight">Dias com ponto</span>
     <span class="block mt-1 text-2xl font-extrabold text-slate-900 font-mono-numbers">{{ stats.pontos }}</span>
   </div>
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
-    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Extras no mês</span>
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-subtle">
+    <span class="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 leading-tight">Extras no mês</span>
     <span class="block mt-1 text-2xl font-extrabold text-emerald-600 font-mono-numbers">{% if db_erro %}—{% else %}{{ stats.extras|hhmm }}{% endif %}</span>
   </div>
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
-    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Folgas ganhas</span>
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-subtle">
+    <span class="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 leading-tight">Folgas ganhas</span>
     <span class="block mt-1 text-2xl font-extrabold text-sky-600 font-mono-numbers">{{ stats.folgas }}</span>
     {% if ciclo_ativo and stats.sem_ponto %}
-      <span class="mt-1 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 self-start">{{ stats.sem_ponto }} dia(s) de escala sem ponto</span>
+      <span class="inline-block mt-1.5 text-[10.5px] leading-snug text-amber-800 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5">{{ stats.sem_ponto }} dia(s) de escala sem ponto</span>
     {% endif %}
   </div>
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle">
-    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Compensações/abonos</span>
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-subtle">
+    <span class="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 leading-tight">Compensações/abonos</span>
     <span class="block mt-1 text-2xl font-extrabold text-teal-600 font-mono-numbers">{{ stats.comps }}</span>
   </div>
 </section>
 
 <!-- Calendário -->
 <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle overflow-hidden">
-  <div class="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
     <div>
       <h2 class="text-base font-bold text-slate-900">Calendário de {{ mes_label }}</h2>
-      <p class="text-xs text-slate-500 mt-0.5">Cada dia mostra o que foi lançado — pontos, extras, folgas e compensações</p>
+      <p class="hidden sm:block text-xs text-slate-500 mt-0.5">Cada dia mostra o que foi lançado — pontos, extras, folgas e compensações</p>
     </div>
-    <div class="flex flex-wrap items-center gap-3 text-[10.5px] text-slate-600">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10.5px] text-slate-600">
       <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></span> Trabalhado + extras</span>
       <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-sky-100 border border-sky-300"></span> Ganhou folga</span>
       <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-teal-100 border border-teal-300"></span> Compensado/abonado</span>
@@ -73,7 +73,86 @@
     </div>
   </div>
 
-  <div class="overflow-x-auto">
+  <!-- Celular: grade compacta + lista de dias -->
+  <div class="md:hidden">
+    <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/70 text-slate-500 font-semibold text-[10px] uppercase">
+      {% for nome in ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'] %}
+        <div class="py-2 text-center">{{ nome }}</div>
+      {% endfor %}
+    </div>
+    <div class="grid grid-cols-7 gap-1 p-2">
+      {% for c in celulas %}
+        {% if c.vazio %}
+          <div></div>
+        {% else %}
+          {% set extras = c.pontos|selectattr('extras')|list %}
+          {% set ganhou_folga = c.pontos|selectattr('folga')|list %}
+          {% set sem_ponto = not c.pontos and c.escala == 'trabalho' and c.iso <= hoje_iso %}
+          <a href="#dia-{{ c.dia }}" class="relative aspect-square rounded-lg flex flex-col items-center justify-center gap-0.5 border
+            {% if c.pontos and ganhou_folga %}bg-sky-100 border-sky-300
+            {% elif c.pontos %}bg-emerald-100 border-emerald-300
+            {% elif c.comps %}bg-teal-100 border-teal-300
+            {% elif c.feriado %}bg-amber-100 border-amber-300
+            {% elif sem_ponto %}bg-white border-amber-400 border-dashed
+            {% elif c.escala == 'descanso' %}bg-sky-50 border-sky-200
+            {% elif c.fds %}bg-rose-50 border-rose-200
+            {% else %}bg-white border-slate-200{% endif %}
+            {{ 'ring-2 ring-emerald-600 ring-offset-1' if c.iso == hoje_iso else '' }}">
+            <span class="text-sm font-bold font-mono-numbers {{ 'text-slate-900' if (c.tem or c.feriado) else 'text-slate-500' }}">{{ c.dia }}</span>
+            {% if extras %}
+              <span class="text-[8.5px] leading-none font-bold font-mono-numbers text-emerald-800">+{{ extras[0].extras }}</span>
+            {% elif c.pontos %}
+              <span class="text-[8.5px] leading-none font-bold font-mono-numbers text-emerald-800">{{ c.pontos[0].total }}</span>
+            {% elif c.comps %}
+              <span class="text-[8.5px] leading-none font-bold text-teal-800">comp.</span>
+            {% elif c.escala == 'descanso' %}
+              <span class="text-[8.5px] leading-none font-semibold text-sky-700">desc.</span>
+            {% elif c.feriado %}
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+            {% endif %}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% set ns = namespace(algum=false) %}
+    <ul class="border-t border-slate-200 divide-y divide-slate-100">
+      {% for c in celulas %}
+        {% if not c.vazio and (c.pontos or c.comps or c.feriado) %}
+          {% set ns.algum = true %}
+          <li id="dia-{{ c.dia }}" class="px-4 py-3 flex gap-3 scroll-mt-20 {{ 'bg-emerald-50/40' if c.iso == hoje_iso else '' }}">
+            <div class="w-11 shrink-0 text-center">
+              <span class="block text-lg font-bold font-mono-numbers text-slate-900 leading-none">{{ c.dia }}</span>
+              <span class="block text-[10px] uppercase font-semibold text-slate-500 mt-1">{{ ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][loop.index0 % 7] }}</span>
+            </div>
+            <div class="flex-1 min-w-0 space-y-1.5">
+              {% if c.feriado %}<span class="inline-block text-[11px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">🎉 {{ c.feriado }}</span>{% endif %}
+              {% for p in c.pontos %}
+                <div class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-mono-numbers text-slate-600">{{ p.entrada }}–{{ p.saida }} · <strong class="text-slate-900">{{ p.total }}</strong></span>
+                  <span class="flex gap-1">
+                    {% if p.extras %}<span class="text-[10.5px] font-bold font-mono-numbers bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">+{{ p.extras }}</span>{% endif %}
+                    {% if p.folga %}<span class="text-[10.5px] font-semibold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">+1 folga</span>{% endif %}
+                  </span>
+                </div>
+              {% endfor %}
+              {% for cp in c.comps %}
+                <div class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-semibold text-teal-800">{{ cp.status }}</span>
+                  <span class="text-[10.5px] font-mono-numbers font-bold bg-teal-50 text-teal-700 border border-teal-200 px-1.5 py-0.5 rounded">{{ cp.mov }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if not ns.algum %}
+        <li class="px-4 py-8 text-center text-sm text-slate-400 italic">Nenhum lançamento neste mês.</li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <div class="hidden md:block overflow-x-auto">
     <div class="min-w-[700px]">
       <!-- Cabeçalho dos dias da semana -->
       <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/70 text-slate-600 font-semibold text-[11px] uppercase tracking-wider">
@@ -133,8 +212,8 @@
     </div>
   </div>
 
-  <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
-    <span>O dia marcado com ◻︎ verde é <strong>hoje</strong>. Passe o mouse no nome do feriado para ver completo.</span>
+  <div class="px-4 sm:px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
+    <span class="hidden md:inline">O dia marcado com ◻︎ verde é <strong>hoje</strong>. Passe o mouse no nome do feriado para ver completo.</span>
     <span>Balanço geral: <strong class="font-mono-numbers">{{ stats.extras|hhmm if not db_erro else '—' }} extras no mês</strong></span>
   </div>
 </section>
