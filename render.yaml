@@ -1,0 +1,24 @@
+# Receita de deploy para o Render (render.com)
+# O Render cria o serviço automaticamente ao usar "Blueprint":
+# New + → Blueprint → escolha o repositório → preencha as variáveis → Apply.
+
+services:
+  - type: web
+    name: sistema-escala
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      # Preencha estas 4 no painel do Render (não ficam no GitHub):
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false

@@ -1,3 +1,11 @@
+<p align="center">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white">
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat&logo=supabase&logoColor=white">
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind-38BDF8?style=flat&logo=tailwindcss&logoColor=white">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-blue">
+</p>
+
 # 📅 Escala & Banco de Horas
 
 Sistema web (FastAPI + Supabase) para registrar a jornada de trabalho, contar
@@ -16,6 +24,18 @@ horas extras automaticamente e manter um **banco de horas** com folgas.
   **Abono**: desconta os minutos que você digitar.
   **Folga**: consome 1 crédito de folga.
 - Tudo fica no **Supabase** (PostgreSQL) e o acesso é protegido por **senha única**.
+
+## Deploy online (Render)
+
+O projeto já tem a receita pronta (`render.yaml`):
+
+1. Crie conta em [render.com](https://render.com) usando **Sign in with GitHub**
+2. Painel → **New +** → **Blueprint** → autorize e escolha o repositório `sistema-escala`
+3. O Render lê o `render.yaml` e pede as **4 variáveis** (logo abaixo) — preencha com os mesmos valores do seu `.env`:
+   - `ADMIN_PASSWORD` · `SECRET_KEY` · `SUPABASE_URL` · `SUPABASE_KEY`
+4. **Apply** e aguarde o build (~1–2 min). O app fica em `https://sistema-escala-xxxx.onrender.com`
+
+> 💡 No plano grátis o app "dorme" após ~15 min sem uso; o primeiro acesso depois disso demora ~30–50 s para acordar.
 
 ## Sua escala em ciclo (ex.: 4x2)
 
