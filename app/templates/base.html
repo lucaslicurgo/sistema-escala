@@ -4,23 +4,8 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>{% block titulo %}Escala &amp; Banco de Horas{% endblock %}</title>
-  <!-- Tailwind CSS v3 with Plugins -->
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: {
-        colors: { brand: {50:'#ecfdf5',100:'#d1fae5',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'} },
-        fontFamily: {
-          sans: ['Inter','system-ui','-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','sans-serif'],
-          mono: ['JetBrains Mono','ui-monospace','SFMono-Regular','Menlo','monospace']
-        },
-        boxShadow: {
-          'subtle': '0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px 0 rgba(0,0,0,0.03)',
-          'card': '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)'
-        }
-      }}
-    }
-  </script>
+  <!-- CSS gerado localmente (npm run build:css) — sem depender de CDN -->
+  <link rel="stylesheet" href="/static/css/app.css?v=1"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
   <style>

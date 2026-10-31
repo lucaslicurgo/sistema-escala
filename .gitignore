@@ -1,5 +1,6 @@
 # Segredos e ambiente local — NÃO versionar
 .env
 .venv/
+node_modules/
 __pycache__/
 *.pyc

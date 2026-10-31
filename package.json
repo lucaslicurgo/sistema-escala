@@ -1,0 +1,26 @@
+{
+  "name": "escala-julia",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">   <img alt=\"FastAPI\" src=\"https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi\">   <img alt=\"Python\" src=\"https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white\">   <img alt=\"Supabase\" src=\"https://img.shields.io/badge/Supabase-3FCF8E?style=flat&logo=supabase&logoColor=white\">   <img alt=\"Tailwind CSS\" src=\"https://img.shields.io/badge/Tailwind-38BDF8?style=flat&logo=tailwindcss&logoColor=white\">   <img alt=\"License\" src=\"https://img.shields.io/badge/License-MIT-blue\"> </p>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i app/tema.css -o static/css/app.css --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucaslicurgo/sistema-escala.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lucaslicurgo/sistema-escala/issues"
+  },
+  "homepage": "https://github.com/lucaslicurgo/sistema-escala#readme",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "tailwindcss": "^3.4.17"
+  }
+}
