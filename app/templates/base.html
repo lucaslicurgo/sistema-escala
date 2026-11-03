@@ -5,8 +5,17 @@
   <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
   <meta name="theme-color" content="#ffffff"/>
   <title>{% block titulo %}Escala &amp; Banco de Horas{% endblock %}</title>
+  <script>
+    // Aplica o tema salvo (ou o do sistema) antes de qualquer pintura, evitando flash branco
+    (function () {
+      var salvo = null;
+      try { salvo = localStorage.getItem('tema'); } catch (e) {}
+      var escuro = salvo ? salvo === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (escuro) document.documentElement.classList.add('dark');
+    })();
+  </script>
   <!-- CSS gerado localmente (npm run build:css) — sem depender de CDN -->
-  <link rel="stylesheet" href="/static/css/app.css?v=2"/>
+  <link rel="stylesheet" href="/static/css/app.css?v=3"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
   <style>
@@ -42,17 +51,26 @@
 
       <nav class="hidden md:flex items-center space-x-1">
         <a aria-current="{{ 'page' if em_dash else 'false' }}"
-           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 shadow-sm' if em_dash else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
+           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 shadow-sm' if em_dash else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
            href="/dashboard">Dashboard</a>
         <a aria-current="{{ 'page' if em_cal else 'false' }}"
-           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 shadow-sm' if em_cal else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
+           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 shadow-sm' if em_cal else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
            href="/calendario">Calendário</a>
         <a aria-current="{{ 'page' if em_conf else 'false' }}"
-           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 shadow-sm' if em_conf else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
+           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 shadow-sm' if em_conf else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
            href="/configuracoes">Configurações</a>
       </nav>
 
       <div class="flex items-center gap-1 sm:gap-3">
+        <button id="botao-tema" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro" type="button"
+                class="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+          <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewbox="0 0 24 24" aria-hidden="true">
+            <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+          <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewbox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </button>
         <div class="hidden md:block h-6 w-px bg-slate-200"></div>
         <div class="flex items-center gap-2.5">
           <div class="{{ 'hidden lg:flex' if not em_dash else 'hidden md:flex' }} items-center gap-2.5">
@@ -144,5 +162,30 @@
 </nav>
 
 {% block scripts %}{% endblock %}
+
+<script>
+  (function () {
+    var botao = document.getElementById('botao-tema');
+    if (!botao) return;
+    var metaTema = document.querySelector('meta[name="theme-color"]');
+    botao.addEventListener('click', function () {
+      var escuro = document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem('tema', escuro ? 'dark' : 'light'); } catch (e) {}
+      if (metaTema) metaTema.setAttribute('content', escuro ? '#0f172a' : '#ffffff');
+    });
+    // No modo automático (sem escolha salva), acompanha o tema do sistema ao vivo
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (evento) {
+        if (localStorage.getItem('tema')) return;
+        var escuro = evento.matches;
+        document.documentElement.classList.toggle('dark', escuro);
+        if (metaTema) metaTema.setAttribute('content', escuro ? '#0f172a' : '#ffffff');
+      });
+    } catch (e) {}
+    // Mantém a cor da barra do celular em sincronia com o tema inicial
+    var escuroInicial = document.documentElement.classList.contains('dark');
+    if (metaTema && escuroInicial) metaTema.setAttribute('content', '#0f172a');
+  })();
+</script>
 </body>
 </html>

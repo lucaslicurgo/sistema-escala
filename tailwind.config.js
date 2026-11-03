@@ -1,5 +1,6 @@
 /** Config do Tailwind para o sistema Escala & Banco de Horas */
 module.exports = {
+  darkMode: "class",
   content: ["./app/templates/**/*.html", "./app/main.py"],
   theme: {
     extend: {

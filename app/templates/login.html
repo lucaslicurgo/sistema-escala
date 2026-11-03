@@ -4,13 +4,32 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Entrar · Escala &amp; Banco de Horas</title>
+  <script>
+    // Aplica o tema salvo (ou o do sistema) antes de qualquer pintura, evitando flash branco
+    (function () {
+      var salvo = null;
+      try { salvo = localStorage.getItem('tema'); } catch (e) {}
+      var escuro = salvo ? salvo === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (escuro) document.documentElement.classList.add('dark');
+    })();
+  </script>
   <!-- CSS gerado localmente (npm run build:css) — sem depender de CDN -->
-  <link rel="stylesheet" href="/static/css/app.css?v=1"/>
+  <link rel="stylesheet" href="/static/css/app.css?v=3"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
   <style> body { -webkit-font-smoothing: antialiased; font-family: 'Inter', sans-serif; } </style>
 </head>
 <body class="min-h-screen bg-gradient-to-tr from-emerald-800 via-emerald-700 to-teal-600 flex items-center justify-center p-4">
+
+  <button id="botao-tema" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro" type="button"
+          class="fixed top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors">
+    <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewbox="0 0 24 24" aria-hidden="true">
+      <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+    </svg>
+    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewbox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+    </svg>
+  </button>
 
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
     <div class="flex flex-col items-center text-center">
@@ -49,5 +68,15 @@
       </p>
     {% endif %}
   </div>
+
+  <script>
+    (function () {
+      var botao = document.getElementById('botao-tema');
+      botao.addEventListener('click', function () {
+        var escuro = document.documentElement.classList.toggle('dark');
+        try { localStorage.setItem('tema', escuro ? 'dark' : 'light'); } catch (e) {}
+      });
+    })();
+  </script>
 </body>
 </html>
