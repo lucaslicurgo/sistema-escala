@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block titulo %}Configurações · Escala &amp; Banco de Horas{% endblock %}
+{% block titulo %}Configurações · Chronos{% endblock %}
 {% block conteudo %}
 
 <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6 mb-8">
   <div class="flex items-start sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
     <div class="flex items-center gap-2.5">
-      <div class="p-2 rounded-lg bg-teal-50 text-teal-700">
+      <div class="p-2 rounded-lg bg-brand-50 text-brand-700">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
           <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
@@ -20,21 +20,21 @@
 
   <div class="grid grid-cols-3 gap-2 sm:gap-3" id="opcoes-tema" role="group" aria-label="Escolher tema">
     <button data-tema="light" type="button"
-            class="tema-opcao flex flex-col items-center gap-1.5 rounded-xl border p-3 sm:p-4 text-xs font-semibold transition-colors border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50">
+            class="tema-opcao flex flex-col items-center gap-1.5 rounded-xl border p-3 sm:p-4 text-xs font-semibold transition-colors border-slate-200 text-slate-600 hover:border-brand-300 hover:bg-slate-50">
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24" aria-hidden="true">
         <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
       </svg>
       Claro
     </button>
     <button data-tema="dark" type="button"
-            class="tema-opcao flex flex-col items-center gap-1.5 rounded-xl border p-3 sm:p-4 text-xs font-semibold transition-colors border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50">
+            class="tema-opcao flex flex-col items-center gap-1.5 rounded-xl border p-3 sm:p-4 text-xs font-semibold transition-colors border-slate-200 text-slate-600 hover:border-brand-300 hover:bg-slate-50">
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24" aria-hidden="true">
         <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
       </svg>
       Escuro
     </button>
     <button data-tema="auto" type="button"
-            class="tema-opcao flex flex-col items-center gap-1.5 rounded-xl border p-3 sm:p-4 text-xs font-semibold transition-colors border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50">
+            class="tema-opcao flex flex-col items-center gap-1.5 rounded-xl border p-3 sm:p-4 text-xs font-semibold transition-colors border-slate-200 text-slate-600 hover:border-brand-300 hover:bg-slate-50">
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24" aria-hidden="true">
         <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
       </svg>
@@ -70,23 +70,23 @@
     <input type="hidden" name="fds_no_ciclo_dobra" value="{{ config['fds_no_ciclo_dobra']|default('nao') }}"/>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-jornada">Jornada base/dia</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-jornada" name="jornada_diaria" placeholder="10:00" required type="text" value="{{ config['jornada_diaria'] }}"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-jornada" name="jornada_diaria" placeholder="10:00" required type="text" value="{{ config['jornada_diaria'] }}"/>
     </div>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-fator-esp">Fator fim de semana/feriado</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-fator-esp" name="fator_especial" placeholder="2" required type="text" value="{{ config['fator_especial'] }}"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-fator-esp" name="fator_especial" placeholder="2" required type="text" value="{{ config['fator_especial'] }}"/>
     </div>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="cfg-fator-util">Fator dia útil (excedente)</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-fator-util" name="fator_util" placeholder="1" required type="text" value="{{ config['fator_util'] }}"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="cfg-fator-util" name="fator_util" placeholder="1" required type="text" value="{{ config['fator_util'] }}"/>
     </div>
     <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer shadow-xs">
-      <input class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300" name="folga_fds_feriado" type="checkbox" value="sim"
+      <input class="h-4 w-4 text-brand-600 focus:ring-brand-500 rounded border-slate-300" name="folga_fds_feriado" type="checkbox" value="sim"
         {{ 'checked' if (config['folga_fds_feriado']|default('sim')) in ('sim','s','1','true') }}/>
       <span class="text-xs font-semibold text-slate-700">Trabalhar fim de semana/feriado gera +1 folga</span>
     </label>
     <div class="sm:col-span-2 pt-2">
-      <button class="w-full sm:w-auto inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 sm:px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors" type="submit">
+      <button class="w-full sm:w-auto inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 sm:px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors" type="submit">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
           <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
@@ -114,7 +114,7 @@
         <p class="text-xs text-slate-500">Ex.: 4x2 — trabalha 4 dias seguidos, DESCANSO 2, girando a semana</p>
       </div>
     </div>
-    <span class="inline-flex shrink-0 items-center px-2 py-1 rounded text-[11px] font-medium {{ 'bg-emerald-100 text-emerald-800' if ciclo_ativo else 'bg-slate-100 text-slate-700' }}">
+    <span class="inline-flex shrink-0 items-center px-2 py-1 rounded text-[11px] font-medium {{ 'bg-brand-100 text-brand-800' if ciclo_ativo else 'bg-slate-100 text-slate-700' }}">
       {{ 'Ciclo ATIVO' if ciclo_ativo else 'Ciclo desligado' }}
     </span>
   </div>
@@ -126,7 +126,7 @@
     <input name="folga_fds_feriado" type="hidden" value="{{ config['folga_fds_feriado'] }}"/>
 
     <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer shadow-xs">
-      <input {{ 'checked' if (config['ciclo_ativo']|default('nao')) in ('sim','s','1','true') }} class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300" name="ciclo_ativo" type="checkbox" value="sim"/>
+      <input {{ 'checked' if (config['ciclo_ativo']|default('nao')) in ('sim','s','1','true') }} class="h-4 w-4 text-brand-600 focus:ring-brand-500 rounded border-slate-300" name="ciclo_ativo" type="checkbox" value="sim"/>
       <span class="text-xs font-semibold text-slate-700">Ciclo de escala ativo (descansos e dias de escala calculados pelo sistema)</span>
     </label>
 
@@ -146,7 +146,7 @@
     </div>
 
     <label class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer shadow-xs">
-      <input {{ 'checked' if (config['fds_no_ciclo_dobra']|default('nao')) in ('sim','s','1','true') }} class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300" name="fds_no_ciclo_dobra" type="checkbox" value="sim"/>
+      <input {{ 'checked' if (config['fds_no_ciclo_dobra']|default('nao')) in ('sim','s','1','true') }} class="h-4 w-4 text-brand-600 focus:ring-brand-500 rounded border-slate-300" name="fds_no_ciclo_dobra" type="checkbox" value="sim"/>
       <span class="text-xs font-semibold text-slate-700">Dobrar fim de semana <u>dentro</u> da escala (padrão: não — o sábado/domingo do ciclo é dia normal)</span>
     </label>
 
@@ -155,7 +155,7 @@
       <p class="text-xs font-semibold text-indigo-900 mb-2">Próximos dias segundo o ciclo:</p>
       <div class="flex flex-wrap gap-1.5">
         {% for e in ciclo_exemplo %}
-          <span class="text-[10.5px] font-mono-numbers px-1.5 py-1 rounded {{ 'bg-emerald-100 text-emerald-800' if e.status == 'trabalho' else 'bg-sky-100 text-sky-800' }}" title="{{ 'trabalha' if e.status == 'trabalho' else 'descansa' }}">
+          <span class="text-[10.5px] font-mono-numbers px-1.5 py-1 rounded {{ 'bg-brand-100 text-brand-800' if e.status == 'trabalho' else 'bg-sky-100 text-sky-800' }}" title="{{ 'trabalha' if e.status == 'trabalho' else 'descansa' }}">
             {{ e.data }} · {{ e.sigla }}
           </span>
         {% endfor %}
@@ -197,11 +197,11 @@
   <form action="/feriados" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end p-4 sm:p-5 border-b border-slate-100" method="post">
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="fer-data">Data</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="fer-data" name="data" required type="date"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="fer-data" name="data" required type="date"/>
     </div>
     <div>
       <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="fer-nome">Nome</label>
-      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs placeholder-slate-400 py-2.5 sm:py-2 px-3" id="fer-nome" name="nome" placeholder="Ex.: Natal" required type="text"/>
+      <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs placeholder-slate-400 py-2.5 sm:py-2 px-3" id="fer-nome" name="nome" placeholder="Ex.: Natal" required type="text"/>
     </div>
     <button class="inline-flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white transition-colors" type="submit">
       Adicionar feriado
@@ -256,8 +256,8 @@
     var escolhido = salvo === 'dark' ? 'dark' : (salvo === 'light' ? 'light' : 'auto');
 
     // Classes compartilhadas pela opção ativa e inativa
-    var classesAtivas = 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'.split(' ');
-    var classesInativas = 'border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50'.split(' ');
+    var classesAtivas = 'border-brand-500 bg-brand-50 text-brand-700 ring-1 ring-brand-500'.split(' ');
+    var classesInativas = 'border-slate-200 text-slate-600 hover:border-brand-300 hover:bg-slate-50'.split(' ');
 
     function marcar(opcao, ativa) {
       var lista = ativa ? classesAtivas : classesInativas;

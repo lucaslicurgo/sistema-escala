@@ -4,7 +4,12 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
   <meta name="theme-color" content="#ffffff"/>
-  <title>{% block titulo %}Escala &amp; Banco de Horas{% endblock %}</title>
+  <!-- Marca: favicons, manifest e cores do kit Chronos (design/logo/kit) -->
+  <link rel="icon" href="/static/brand/favicon.ico?v=1" sizes="48x48"/>
+  <link rel="icon" href="/static/brand/favicon.svg?v=1" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/static/brand/apple-touch-icon.png?v=1"/>
+  <link rel="manifest" href="/static/brand/site.webmanifest"/>
+  <title>{% block titulo %}Chronos{% endblock %}</title>
   <script>
     // Aplica o tema salvo (ou o do sistema) antes de qualquer pintura, evitando flash branco
     (function () {
@@ -17,10 +22,12 @@
   <!-- CSS gerado localmente (npm run build:css) — sem depender de CDN -->
   <link rel="stylesheet" href="/static/css/app.css?v=3"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
   <style>
     body { -webkit-font-smoothing: antialiased; background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-    .font-mono-numbers { font-family: 'JetBrains Mono', monospace; font-feature-settings: 'tnum' on, 'lnum' on; }
+    /* Títulos e números de saldo/horas: Plus Jakarta Sans com tabular-nums (guia da marca §5) */
+    h1, h2 { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+    .font-mono-numbers { font-family: 'Plus Jakarta Sans', 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' on, 'lnum' on; }
     input[type="time"]::-webkit-calendar-picker-indicator,
     input[type="date"]::-webkit-calendar-picker-indicator { opacity: .6; cursor: pointer; transition: opacity .2s ease; }
     input[type="time"]::-webkit-calendar-picker-indicator:hover,
@@ -38,13 +45,11 @@
   <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-14 sm:h-16">
       <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-sm shadow-emerald-500/20">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-          </svg>
-        </div>
+        <!-- Símbolo isolado da marca em barra compacta (respiro vertical ≥ 0,5×E — guia §2) -->
+        <img src="/static/brand/chronos-symbol-app-icon.svg?v=1" alt="Símbolo do Chronos"
+             class="w-9 h-9 sm:w-10 sm:h-10 shrink-0"/>
         <div class="min-w-0">
-          <span class="text-sm sm:text-base font-bold tracking-tight text-slate-900 block leading-tight truncate">Escala &amp; Banco de Horas</span>
+          <span class="text-sm sm:text-base font-bold tracking-tight text-slate-900 block leading-tight truncate">Chronos</span>
           <span class="hidden sm:block text-xs text-slate-500">Controle de jornada e compensações</span>
         </div>
       </div>
@@ -74,7 +79,7 @@
         <div class="hidden md:block h-6 w-px bg-slate-200"></div>
         <div class="flex items-center gap-2.5">
           <div class="{{ 'hidden lg:flex' if not em_dash else 'hidden md:flex' }} items-center gap-2.5">
-            <div class="w-8 h-8 rounded-full bg-slate-100 ring-2 ring-emerald-500/20 text-slate-700 font-semibold text-xs flex items-center justify-center">
+            <div class="w-8 h-8 rounded-full bg-slate-100 ring-2 ring-brand-500/20 text-slate-700 font-semibold text-xs flex items-center justify-center">
               {{ usuario[:2]|upper }}
             </div>
             <div class="hidden lg:block text-left">
@@ -89,7 +94,7 @@
         <!-- Mobile: só o sair (a navegação fica na barra inferior) -->
         <form method="post" action="/logout" class="md:hidden">
           <button class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 px-2.5 py-2 rounded-lg transition-colors" type="submit" aria-label="Sair">
-            <span class="w-7 h-7 rounded-full bg-slate-100 ring-2 ring-emerald-500/20 text-slate-700 font-semibold text-[11px] flex items-center justify-center">{{ usuario[:2]|upper }}</span>
+            <span class="w-7 h-7 rounded-full bg-slate-100 ring-2 ring-brand-500/20 text-slate-700 font-semibold text-[11px] flex items-center justify-center">{{ usuario[:2]|upper }}</span>
             Sair
           </button>
         </form>
@@ -113,7 +118,7 @@
     </div>
   {% endif %}
   {% if aviso %}
-    <div class="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800 flex items-center gap-3">
+    <div class="mb-6 bg-brand-50 border border-brand-200 rounded-xl p-4 text-sm text-brand-800 flex items-center gap-3">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
       </svg>
@@ -135,8 +140,8 @@
 <footer class="hidden md:block bg-white border-t border-slate-200 py-6 mt-12">
   <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 text-center sm:text-left">
     <div class="flex items-center gap-2">
-      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-      <span>Escala &amp; Banco de Horas · dados no Supabase</span>
+      <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+      <span>Chronos · dados no Supabase</span>
     </div>
     <span>Sistema desenvolvido para gestão pessoal de jornada</span>
   </div>
@@ -145,17 +150,17 @@
 <!-- Barra de navegação inferior (só mobile) -->
 <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 flex" style="padding-bottom: env(safe-area-inset-bottom)">
   <a href="/dashboard" aria-current="{{ 'page' if em_dash else 'false' }}"
-     class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-emerald-700' if em_dash else 'text-slate-500' }}">
+     class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-brand-700' if em_dash else 'text-slate-500' }}">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ '2.2' if em_dash else '1.8' }}"></path></svg>
     Início
   </a>
   <a href="/calendario" aria-current="{{ 'page' if em_cal else 'false' }}"
-     class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-emerald-700' if em_cal else 'text-slate-500' }}">
+     class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-brand-700' if em_cal else 'text-slate-500' }}">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ '2.2' if em_cal else '1.8' }}"></path></svg>
     Calendário
   </a>
   <a href="/configuracoes" aria-current="{{ 'page' if em_conf else 'false' }}"
-     class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-emerald-700' if em_conf else 'text-slate-500' }}">
+     class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-brand-700' if em_conf else 'text-slate-500' }}">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ '2.2' if em_conf else '1.8' }}"></path></svg>
     Ajustes
   </a>

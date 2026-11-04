@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"><title>Chronos</title><g transform="translate(-11.13 -11.14) scale(1.087)">
+  <title id="title">Chronos — Símbolo Tamanho Pequeno (Favicon / 16px)</title>
+  <g id="symbol-small">
+    <path id="c-arc" fill="#0B555A" d="M 137 29.21 A 101 101 0 1 0 137 226.79 A 25 25 0 0 0 126.6 177.89 A 51 51 0 1 1 126.6 78.11 A 25 25 0 0 0 137 29.21 Z"/>
+    <path id="impulse-chevron" fill="#D94E28" d="M 200.32 77.8 L 234.26 111.74 A 23 23 0 0 1 234.26 144.26 L 200.32 178.2 A 23 23 0 0 1 167.8 145.68 L 181.23 132.24 A 6 6 0 0 0 181.23 123.76 L 167.8 110.32 A 23 23 0 0 1 200.32 77.8 Z"/>
+  </g>
+</g></svg>

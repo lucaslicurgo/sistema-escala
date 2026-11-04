@@ -1,4 +1,4 @@
-"""Sistema de Escala & Banco de Horas — FastAPI + Supabase."""
+"""Chronos — Sistema de Escala & Banco de Horas — FastAPI + Supabase."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from typing import Any
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -29,8 +29,13 @@ MESES = [
 ]
 DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 
-app = FastAPI(title="Escala & Banco de Horas", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title="Chronos", docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/static", StaticFiles(directory=str(PROJETO_DIR / "static")), name="static")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(PROJETO_DIR / "static" / "brand" / "favicon.ico")
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 templates.env.filters["hhmm"] = calculo.hhmm

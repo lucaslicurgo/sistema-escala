@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titulo %}Dashboard · Escala &amp; Banco de Horas{% endblock %}
+{% block titulo %}Dashboard · Chronos{% endblock %}
 {% block conteudo %}
 
 {% macro icone_lapis() %}
@@ -31,7 +31,7 @@
       </svg>
       <span class="hidden sm:inline">Mês anterior</span>
     </a>
-    <a class="px-3 py-2 sm:py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-lg transition" href="/dashboard">Hoje</a>
+    <a class="px-3 py-2 sm:py-1.5 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100/80 border border-brand-200 rounded-lg transition" href="/dashboard">Hoje</a>
     <a aria-label="Mês seguinte" class="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg transition" href="/dashboard?mes={{ mes_seguinte }}">
       <span class="hidden sm:inline">Mês seguinte</span>
       <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
@@ -44,16 +44,16 @@
 <!-- Cards de indicadores -->
 <section aria-label="Indicadores" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-8">
   <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-5 shadow-subtle hover:shadow-card transition relative overflow-hidden">
-    <div class="absolute top-0 left-0 right-0 h-1 {{ 'bg-emerald-500' if saldo_positivo else 'bg-rose-500' }}"></div>
+    <div class="absolute top-0 left-0 right-0 h-1 {{ 'bg-positive-500' if saldo_positivo else 'bg-rose-500' }}"></div>
     <div class="flex items-start justify-between">
       <div>
         <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 leading-tight block">Saldo Banco de Horas</span>
         <div class="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span class="text-2xl sm:text-3xl font-extrabold font-mono-numbers tracking-tight {{ 'text-emerald-600' if saldo_positivo else 'text-rose-600' }}">{{ saldo_min|hhmm }}</span>
-          <span class="text-xs font-medium {{ 'text-emerald-700 bg-emerald-50 border border-emerald-200' if saldo_positivo else 'text-rose-700 bg-rose-50 border border-rose-200' }} px-1.5 py-0.5 rounded">{{ 'Crédito' if saldo_positivo else 'Débito' }}</span>
+          <span class="text-2xl sm:text-3xl font-extrabold font-mono-numbers tracking-tight {{ 'text-positive-600' if saldo_positivo else 'text-rose-600' }}">{{ saldo_min|hhmm }}</span>
+          <span class="text-xs font-medium {{ 'text-positive-700 bg-positive-50 border border-positive-200' if saldo_positivo else 'text-rose-700 bg-rose-50 border border-rose-200' }} px-1.5 py-0.5 rounded">{{ 'Crédito' if saldo_positivo else 'Débito' }}</span>
         </div>
       </div>
-      <div class="hidden sm:flex w-10 h-10 shrink-0 rounded-xl {{ 'bg-emerald-50 text-emerald-600' if saldo_positivo else 'bg-rose-50 text-rose-600' }} items-center justify-center">
+      <div class="hidden sm:flex w-10 h-10 shrink-0 rounded-xl {{ 'bg-positive-50 text-positive-600' if saldo_positivo else 'bg-rose-50 text-rose-600' }} items-center justify-center">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
           <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
@@ -137,7 +137,7 @@
   <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6" id="painel-registro">
     <div class="flex items-start sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
       <div class="flex items-center gap-2.5">
-        <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+        <div class="p-2 rounded-lg bg-brand-50 text-brand-700">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
@@ -147,7 +147,7 @@
           <p class="text-xs text-slate-500">Lance entradas, saídas e intervalos da sua jornada</p>
         </div>
       </div>
-      <button class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100/70 border border-emerald-200/80 px-2.5 py-1.5 rounded-lg transition flex shrink-0 items-center gap-1.5" id="btn-agora" type="button">
+      <button class="text-xs font-semibold text-brand-700 hover:text-brand-800 bg-brand-50 hover:bg-brand-100/70 border border-brand-200/80 px-2.5 py-1.5 rounded-lg transition flex shrink-0 items-center gap-1.5" id="btn-agora" type="button">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
           <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
@@ -159,41 +159,41 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-data">Data</label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-data" name="data" type="date" value="{{ hoje }}"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-data" name="data" type="date" value="{{ hoje }}"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-entrada">Entrada</label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-entrada" name="entrada" type="time" value="08:00"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-entrada" name="entrada" type="time" value="08:00"/>
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-saida">Saída <span class="text-[11px] font-normal text-slate-500 ml-1">(suporta pós meia-noite)</span></label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-saida" name="saida" type="time" value="19:00"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2 px-3" id="ponto-saida" name="saida" type="time" value="19:00"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-pausa">Pausa / Almoço (min)</label>
           <div class="relative">
-            <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2 px-3 pr-14" id="ponto-pausa" min="0" name="pausa_min" step="5" type="number" value="0"/>
+            <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2 px-3 pr-14" id="ponto-pausa" min="0" name="pausa_min" step="5" type="number" value="0"/>
             <span class="absolute right-3 top-2 text-xs text-slate-400 pointer-events-none">minutos</span>
           </div>
         </div>
       </div>
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="ponto-obs">Observação <span class="text-slate-400 font-normal">(opcional)</span></label>
-        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs placeholder-slate-400 py-2 px-3" id="ponto-obs" name="observacao" placeholder="Ex: autorizada pela gerência, troca de turno..." type="text"/>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs placeholder-slate-400 py-2 px-3" id="ponto-obs" name="observacao" placeholder="Ex: autorizada pela gerência, troca de turno..." type="text"/>
       </div>
 
       <div class="bg-slate-50 border border-slate-200/80 rounded-lg p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-slate-600">
         <span class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="w-2 h-2 rounded-full bg-brand-500"></span>
           Horas líquidas: <strong class="font-mono-numbers text-slate-800" id="prev-total">—</strong>
         </span>
-        <span class="text-slate-500 pl-3.5 sm:pl-0">Extras estimadas (dia útil): <strong class="font-mono-numbers text-emerald-700" id="prev-extras">—</strong></span>
+        <span class="text-slate-500 pl-3.5 sm:pl-0">Extras estimadas (dia útil): <strong class="font-mono-numbers text-brand-700" id="prev-extras">—</strong></span>
       </div>
 
       <div class="pt-2">
-        <button class="w-full inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors" type="submit">
+        <button class="w-full inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors" type="submit">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
@@ -211,7 +211,7 @@
   <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6" id="painel-compensacao">
     <div class="flex items-start sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
       <div class="flex items-center gap-2.5">
-        <div class="p-2 rounded-lg bg-teal-50 text-teal-700">
+        <div class="p-2 rounded-lg bg-brand-50 text-brand-700">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
@@ -228,11 +228,11 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-data">Data</label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs font-mono-numbers py-2 px-3" id="comp-data" name="data" type="date" value="{{ hoje }}"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2 px-3" id="comp-data" name="data" type="date" value="{{ hoje }}"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-tipo">Tipo de Movimentação</label>
-          <select class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs py-2 px-3 text-slate-800" id="comp-tipo" name="tipo">
+          <select class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs py-2 px-3 text-slate-800" id="comp-tipo" name="tipo">
             <option value="compensacao">Compensar dia (−jornada do banco)</option>
             <option value="abono">Abono de horas (−minutos)</option>
             <option value="folga">Usar folga (−1 folga)</option>
@@ -243,28 +243,28 @@
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-minutos">Minutos <span class="text-slate-400 font-normal">(apenas para abono)</span></label>
           <div class="relative">
-            <input class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs font-mono-numbers py-2 px-3 pr-14" id="comp-minutos" min="0" name="horas_min" step="10" type="number" value="0"/>
+            <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2 px-3 pr-14" id="comp-minutos" min="0" name="horas_min" step="10" type="number" value="0"/>
             <span class="absolute right-3 top-2 text-xs text-slate-400 pointer-events-none">minutos</span>
           </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="comp-obs">Observação <span class="text-slate-400 font-normal">(opcional)</span></label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-xs placeholder-slate-400 py-2 px-3" id="comp-obs" name="observacao" placeholder="Ex: referente ao plantão de feriado do dia 12" type="text"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs placeholder-slate-400 py-2 px-3" id="comp-obs" name="observacao" placeholder="Ex: referente ao plantão de feriado do dia 12" type="text"/>
         </div>
       </div>
 
-      <div class="bg-teal-50/70 border border-teal-200/80 rounded-lg p-3 text-xs text-teal-800 flex items-center justify-between gap-2">
+      <div class="bg-brand-50/70 border border-brand-200/80 rounded-lg p-3 text-xs text-brand-800 flex items-center justify-between gap-2">
         <span class="flex items-center gap-1.5">
-          <svg class="w-4 h-4 text-teal-600 shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <svg class="w-4 h-4 text-brand-600 shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
-          Impacto no saldo: <strong class="font-mono-numbers text-teal-900" id="impacto-comp">-</strong>
+          Impacto no saldo: <strong class="font-mono-numbers text-brand-900" id="impacto-comp">-</strong>
         </span>
-        <span class="hidden sm:inline text-[11px] font-semibold text-teal-700 bg-white border border-teal-200 px-2 py-0.5 rounded">Débito Seguro</span>
+        <span class="hidden sm:inline text-[11px] font-semibold text-brand-700 bg-white border border-brand-200 px-2 py-0.5 rounded">Débito Seguro</span>
       </div>
 
       <div class="pt-2">
-        <button class="w-full inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors" type="submit">
+        <button class="w-full inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors" type="submit">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
@@ -298,7 +298,7 @@
   <!-- Celular: lista em cartões -->
   <ul class="md:hidden divide-y divide-slate-200/70">
     {% for l in linhas %}
-    <li class="px-4 py-3.5 {{ 'bg-teal-50/30' if l.tipo != 'ponto' else '' }}" data-extras="{{ '1' if (l.tipo == 'ponto' and l.tem_extra) else '0' }}" data-kind="{{ 'ponto' if l.tipo == 'ponto' else 'comp' }}">
+    <li class="px-4 py-3.5 {{ 'bg-brand-50/30' if l.tipo != 'ponto' else '' }}" data-extras="{{ '1' if (l.tipo == 'ponto' and l.tem_extra) else '0' }}" data-kind="{{ 'ponto' if l.tipo == 'ponto' else 'comp' }}">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-1.5">
@@ -314,12 +314,12 @@
             <p class="mt-1 text-xs text-slate-600 font-mono-numbers">{{ l.entrada }} → {{ l.saida }} <span class="text-slate-400">· pausa {{ l.pausa }}</span></p>
             <p class="mt-0.5 text-xs text-slate-500">Total líquido <strong class="font-mono-numbers text-slate-900">{{ l.total }}</strong></p>
           {% else %}
-            <p class="mt-1 text-xs font-medium text-teal-800">{{ l.status }} · <span class="font-mono-numbers">{{ l.rotulo }}</span></p>
+            <p class="mt-1 text-xs font-medium text-brand-800">{{ l.status }} · <span class="font-mono-numbers">{{ l.rotulo }}</span></p>
           {% endif %}
           {% if l.obs %}<p class="mt-1 text-[11px] text-slate-500 truncate">{{ l.obs }}</p>{% endif %}
         </div>
         <div class="flex flex-col items-end gap-2 shrink-0">
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold font-mono-numbers {{ 'bg-slate-100 text-slate-700' if l.tipo == 'ponto' and not l.tem_extra else ('bg-emerald-50 text-emerald-700' if l.tipo == 'ponto' else 'bg-rose-50 text-rose-700') }}">{{ l.mov }}</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold font-mono-numbers {{ 'bg-slate-100 text-slate-700' if l.tipo == 'ponto' and not l.tem_extra else ('bg-brand-50 text-brand-700' if l.tipo == 'ponto' else 'bg-rose-50 text-rose-700') }}">{{ l.mov }}</span>
           <div class="flex items-center gap-1 text-slate-400">
             {% if l.tipo == 'ponto' %}
               <a class="p-2 -m-0.5 hover:text-slate-700 rounded-lg" href="/registros/{{ l.id }}" aria-label="Editar registro">{{ icone_lapis() }}</a>
@@ -358,7 +358,7 @@
       </thead>
       <tbody class="divide-y divide-slate-200/70 text-slate-700">
         {% for l in linhas %}
-        <tr class="hover:bg-slate-50/60 transition {{ 'bg-teal-50/20' if l.tipo == 'compensacao' else '' }}" data-extras="{{ '1' if (l.tipo == 'ponto' and l.tem_extra) else '0' }}" data-kind="{{ 'ponto' if l.tipo == 'ponto' else 'comp' }}">
+        <tr class="hover:bg-slate-50/60 transition {{ 'bg-brand-50/20' if l.tipo == 'compensacao' else '' }}" data-extras="{{ '1' if (l.tipo == 'ponto' and l.tem_extra) else '0' }}" data-kind="{{ 'ponto' if l.tipo == 'ponto' else 'comp' }}">
           <td class="py-4 pl-4 sm:pl-6 pr-3 font-semibold text-slate-900 font-mono-numbers">{{ l.data }}</td>
           <td class="px-3 py-4 text-slate-500">
             {{ l.dia }}
@@ -377,22 +377,22 @@
             <td class="px-3 py-4 text-slate-400 italic">--:--</td>
             <td class="px-3 py-4 text-slate-400 italic">--:--</td>
             <td class="px-3 py-4 text-slate-400 italic">--:--</td>
-            <td class="px-3 py-4 font-mono-numbers font-medium text-teal-800">{{ l.rotulo }}</td>
+            <td class="px-3 py-4 font-mono-numbers font-medium text-brand-800">{{ l.rotulo }}</td>
           {% endif %}
           <td class="px-3 py-4">
-            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold font-mono-numbers {{ 'bg-slate-100 text-slate-700' if l.tipo == 'ponto' and not l.tem_extra else ('bg-emerald-50 text-emerald-700' if l.tipo == 'ponto' else 'bg-rose-50 text-rose-700') }}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold font-mono-numbers {{ 'bg-slate-100 text-slate-700' if l.tipo == 'ponto' and not l.tem_extra else ('bg-brand-50 text-brand-700' if l.tipo == 'ponto' else 'bg-rose-50 text-rose-700') }}">
               {{ l.mov }}
             </span>
           </td>
           <td class="px-3 py-4">
             {% if l.tipo == 'ponto' %}
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Registrado
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-50 text-brand-700 border border-brand-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Registrado
               </span>
               {% if l.obs %}<span class="block mt-1 text-[10.5px] text-slate-500 max-w-[220px] truncate" title="{{ l.obs }}">{{ l.obs }}</span>{% endif %}
             {% else %}
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
-                <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> {{ l.status }}
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-brand-50 text-brand-700 border border-brand-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span> {{ l.status }}
               </span>
               {% if l.obs %}<span class="block mt-1 text-[10.5px] text-slate-500 max-w-[220px] truncate" title="{{ l.obs }}">{{ l.obs }}</span>{% endif %}
             {% endif %}
@@ -428,7 +428,7 @@
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <span>Balanço do banco de horas:</span>
-      <span class="px-2 py-0.5 font-mono-numbers font-bold rounded {{ 'bg-emerald-100 text-emerald-800' if saldo_positivo else 'bg-rose-100 text-rose-800' }}">{{ saldo_min|hhmm }} Saldo Atual</span>
+      <span class="px-2 py-0.5 font-mono-numbers font-bold rounded {{ 'bg-positive-100 text-positive-800' if saldo_positivo else 'bg-rose-100 text-rose-800' }}">{{ saldo_min|hhmm }} Saldo Atual</span>
     </div>
   </div>
 </section>

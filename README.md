@@ -1,3 +1,4 @@
+# 🕰️ Chronos
 <p align="center">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi">
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white">
@@ -6,9 +7,7 @@
   <img alt="License" src="https://img.shields.io/badge/License-MIT-blue">
 </p>
 
-# 📅 Escala & Banco de Horas
-
-Sistema web (FastAPI + Supabase) para registrar a jornada de trabalho, contar
+Sistema web (FastAPI + Supabase) da marca **Chronos** para registrar a jornada de trabalho, contar
 horas extras automaticamente e manter um **banco de horas** com folgas.
 
 ## Como funciona

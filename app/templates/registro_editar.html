@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block titulo %}Editar registro · Escala &amp; Banco de Horas{% endblock %}
+{% block titulo %}Editar registro · Chronos{% endblock %}
 {% block conteudo %}
 
 <div class="max-w-2xl mx-auto">
   <section class="bg-white rounded-2xl border border-slate-200 shadow-subtle p-4 sm:p-6">
     <div class="flex items-start sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
       <div class="flex items-center gap-2.5">
-        <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+        <div class="p-2 rounded-lg bg-brand-50 text-brand-700">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>
@@ -23,29 +23,29 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="reg-data">Data</label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-data" name="data" required type="date" value="{{ registro.data }}"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-data" name="data" required type="date" value="{{ registro.data }}"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="reg-entrada">Entrada</label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-entrada" name="entrada" required type="time" value="{{ registro.entrada }}"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-entrada" name="entrada" required type="time" value="{{ registro.entrada }}"/>
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="reg-saida">Saída</label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-saida" name="saida" required type="time" value="{{ registro.saida }}"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-saida" name="saida" required type="time" value="{{ registro.saida }}"/>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="reg-pausa">Pausa / Almoço (min)</label>
-          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-pausa" min="0" name="pausa_min" step="5" type="number" value="{{ registro.pausa_min }}"/>
+          <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs font-mono-numbers py-2.5 sm:py-2 px-3" id="reg-pausa" min="0" name="pausa_min" step="5" type="number" value="{{ registro.pausa_min }}"/>
         </div>
       </div>
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="reg-obs">Observação (opcional)</label>
-        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-xs placeholder-slate-400 py-2.5 sm:py-2 px-3" id="reg-obs" name="observacao" placeholder="opcional" type="text" value="{{ registro.observacao or '' }}"/>
+        <input class="w-full text-sm rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 shadow-xs placeholder-slate-400 py-2.5 sm:py-2 px-3" id="reg-obs" name="observacao" placeholder="opcional" type="text" value="{{ registro.observacao or '' }}"/>
       </div>
       <div class="pt-2 flex flex-col-reverse sm:flex-row gap-3">
-        <button class="inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors" type="submit">
+        <button class="inline-flex justify-center items-center gap-2 py-3 sm:py-2.5 px-6 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors" type="submit">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
             <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
           </svg>

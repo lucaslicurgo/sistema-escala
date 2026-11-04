@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title">
+  <title id="title">Chronos — Símbolo Principal</title>
+  <g id="symbol">
+    <path id="c-arc" fill="#0B555A" d="M 144.88 31.41 A 100 100 0 1 0 144.88 224.59 A 22 22 0 0 0 133.49 182.09 A 56 56 0 1 1 133.49 73.91 A 22 22 0 0 0 144.88 31.41 Z"/>
+    <path id="impulse-chevron" fill="#D94E28" d="M 195.49 77.8 L 230.85 113.15 A 21 21 0 0 1 230.85 142.85 L 195.49 178.2 A 21 21 0 0 1 165.8 148.51 L 180.64 133.66 A 8 8 0 0 0 180.64 122.34 L 165.8 107.49 A 21 21 0 0 1 195.49 77.8 Z"/>
+  </g>
+</svg>
