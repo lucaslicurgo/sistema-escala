@@ -60,7 +60,16 @@ class FakeDB:
             linhas = linhas[: int(params["limit"])]
         return [dict(l) for l in linhas]
 
-    def insert(self, tabela: str, dados: dict, *, upsert: bool = False) -> list[dict]:
+    def insert(
+        self,
+        tabela: str,
+        dados: dict,
+        *,
+        upsert: bool = False,
+        on_conflict: str | None = None,
+    ) -> list[dict]:
+        if on_conflict is not None and tuple(on_conflict.split(",")) != UNICAS.get(tabela):
+            raise RuntimeError(f"Supabase respondeu 400: on_conflict invalido {on_conflict}")
         linhas = self.tabelas.setdefault(tabela, [])
         chave = UNICAS.get(tabela)
         if chave:

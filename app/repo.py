@@ -41,9 +41,12 @@ class Repo:
         linhas = self._listar(tabela, {"id": f"eq.{id}"})
         return linhas[0] if linhas else None
 
-    def _inserir(self, tabela: str, dados: dict, *, upsert: bool = False) -> dict:
+    def _inserir(
+        self, tabela: str, dados: dict, *, on_conflict: str | None = None
+    ) -> dict:
+        extra = {"upsert": True, "on_conflict": on_conflict} if on_conflict else {}
         linhas = self._db.insert(
-            tabela, {**dados, "user_id": self.user_id}, upsert=upsert
+            tabela, {**dados, "user_id": self.user_id}, **extra
         )
         if isinstance(linhas, list):
             return linhas[0] if linhas else {}
@@ -80,7 +83,8 @@ class Repo:
     def salvar_config(self, valores: dict[str, str]) -> None:
         for chave, valor in valores.items():
             self._inserir(
-                "configuracoes", {"chave": chave, "valor": valor}, upsert=True
+                "configuracoes", {"chave": chave, "valor": valor},
+                on_conflict="user_id,chave",
             )
 
     # ------------------------------------------------------------ feriados
@@ -89,7 +93,9 @@ class Repo:
         return self._listar("feriados", {"order": "data.desc"})
 
     def salvar_feriado(self, data: str, nome: str) -> None:
-        self._inserir("feriados", {"data": data, "nome": nome}, upsert=True)
+        self._inserir(
+            "feriados", {"data": data, "nome": nome}, on_conflict="user_id,data"
+        )
 
     def excluir_feriado(self, id: int) -> bool:
         return self._excluir("feriados", id)

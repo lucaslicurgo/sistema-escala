@@ -70,12 +70,20 @@ class SupabaseDB:
     def select(self, tabela: str, params: Optional[dict] = None) -> Any:
         return self._pedir("GET", f"/rest/v1/{tabela}", params=params)
 
-    def insert(self, tabela: str, dados: dict, *, upsert: bool = False) -> Any:
+    def insert(
+        self,
+        tabela: str,
+        dados: dict,
+        *,
+        upsert: bool = False,
+        on_conflict: Optional[str] = None,
+    ) -> Any:
         prefer = "return=representation"
         if upsert:
             prefer += ",resolution=merge-duplicates"
+        params = {"on_conflict": on_conflict} if on_conflict else None
         return self._pedir(
-            "POST", f"/rest/v1/{tabela}", json=dados, prefer=prefer
+            "POST", f"/rest/v1/{tabela}", params=params, json=dados, prefer=prefer
         )
 
     def update(self, tabela: str, filtro: dict, dados: dict) -> Any:

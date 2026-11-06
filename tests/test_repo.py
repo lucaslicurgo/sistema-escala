@@ -28,6 +28,18 @@ def test_mesma_data_em_contas_diferentes(fake_db):
     for uid in ("uid-a", "uid-b"):
         Repo(uid).salvar_feriado("2026-12-25", "Natal")
     assert len(Repo("uid-a").feriados()) == 1
+    assert len(Repo("uid-b").feriados()) == 1
+
+
+def test_salvar_duas_vezes_atualiza(fake_db):
+    a = Repo("uid-a")
+    a.salvar_feriado("2026-12-25", "Natal")
+    a.salvar_feriado("2026-12-25", "Natal 2")
+    assert [f["nome"] for f in a.feriados()] == ["Natal 2"]
+    a.salvar_config({"jornada_diaria": "08:00"})
+    a.salvar_config({"jornada_diaria": "06:00"})
+    assert a.config()["jornada_diaria"] == "06:00"
+    assert len(fake_db.tabelas["configuracoes"]) == 1
 
 
 def test_turno_aberto(fake_db):
