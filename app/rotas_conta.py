@@ -19,8 +19,8 @@ router = APIRouter()
 DESTINO_POS_LOGIN = "/dashboard"  # a Task 6 troca para /ponto
 
 
-def _iniciar_sessao(usuario) -> RedirectResponse:
-    resposta = RedirectResponse(DESTINO_POS_LOGIN, status_code=303)
+def _iniciar_sessao(usuario, aviso: str | None = None) -> RedirectResponse:
+    resposta = redir(DESTINO_POS_LOGIN, aviso=aviso)
     resposta.set_cookie(
         sessao.COOKIE, sessao.criar(usuario.id, usuario.email, usuario.nome),
         max_age=sessao.VALIDADE, httponly=True, samesite="lax",
@@ -61,9 +61,14 @@ def fazer_cadastro(
         return redir("/cadastro", erro="Código de convite inválido.")
     try:
         usuario = supabase_auth.cadastrar(email, senha, nome)
-        preparar_conta_nova(Repo(usuario.id))
     except AuthErro as e:
         return redir("/cadastro", erro=str(e))
+    try:
+        preparar_conta_nova(Repo(usuario.id))
+    except Exception:
+        return _iniciar_sessao(usuario, aviso=(
+            "Conta criada! Não consegui carregar os feriados padrão — "
+            "você pode adicioná-los em Configurações."))
     return _iniciar_sessao(usuario)
 
 

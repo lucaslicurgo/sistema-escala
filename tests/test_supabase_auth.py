@@ -101,3 +101,16 @@ def test_erro_de_rede_vira_mensagem_generica(monkeypatch):
     with pytest.raises(sa.AuthErro) as e:
         sa.entrar("a@b.c", "123456")
     assert "chave" not in str(e.value) and str(e.value) == sa.MSG_GENERICA
+
+
+@pytest.mark.parametrize("token", ["", "   ", None])
+def test_trocar_senha_sem_token_nao_chama_nem_usa_service_role(monkeypatch, token):
+    monkeypatch.setenv("SUPABASE_URL", "http://sb.test")
+    monkeypatch.setenv("SUPABASE_KEY", "chave")
+
+    def proibido(req):
+        raise AssertionError("não deveria chamar o Supabase")
+
+    monkeypatch.setattr(sa, "_cliente", httpx.Client(transport=httpx.MockTransport(proibido)))
+    with pytest.raises(sa.AuthErro, match="expirou"):
+        sa.trocar_senha(token, "novasenha")

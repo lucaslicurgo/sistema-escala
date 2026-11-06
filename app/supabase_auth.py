@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import httpx
 
 MSG_GENERICA = "Não foi possível falar com o serviço de contas. Tente de novo."
+MSG_LINK_EXPIRADO = "Esse link expirou. Peça um novo em \"Esqueci minha senha\"."
 MSG_SENHA_CURTA = "A senha precisa ter pelo menos 6 caracteres."
 
 
@@ -113,13 +114,15 @@ def enviar_recuperacao(email: str, redirect_to: str) -> None:
 
 
 def trocar_senha(access_token: str, nova: str) -> None:
+    if not (access_token or "").strip():
+        raise AuthErro(MSG_LINK_EXPIRADO)
     if len(nova) < 6:
         raise AuthErro(MSG_SENHA_CURTA)
-    r = _pedir("PUT", "/auth/v1/user", json={"password": nova}, token=access_token)
+    r = _pedir("PUT", "/auth/v1/user", json={"password": nova}, token=access_token.strip())
     if r.status_code == 200:
         return
     if r.status_code in (401, 403):
-        raise AuthErro("Esse link expirou. Peça um novo em \"Esqueci minha senha\".")
+        raise AuthErro(MSG_LINK_EXPIRADO)
     if "weak_password" in _codigo(r) or r.status_code == 422:
         raise AuthErro(MSG_SENHA_CURTA)
     raise AuthErro(MSG_GENERICA)

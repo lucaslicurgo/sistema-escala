@@ -82,3 +82,16 @@ def test_redefinir_senha(client, fake_auth):
     assert fake_auth.trocas == [("tok", "novasenha")]
     assert r.headers["location"].startswith("/login?aviso=")
     assert "Senha trocada" in unquote(r.headers["location"])
+
+
+def test_cadastro_com_falha_ao_preparar_conta_ainda_loga(client, fake_auth, fake_db, monkeypatch):
+    monkeypatch.setenv("CODIGO_CONVITE", "julia2026")
+
+    def quebra(*a, **k):
+        raise RuntimeError("banco fora")
+
+    monkeypatch.setattr(fake_db, "insert", quebra)
+    r = _cadastro(client)
+    assert r.status_code == 303 and "sessao" in r.cookies
+    assert "Conta criada! Não consegui carregar os feriados padrão" in unquote(r.headers["location"])
+    assert "fake" not in r.headers["location"] and "banco fora" not in unquote(r.headers["location"])
