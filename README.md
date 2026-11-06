@@ -115,10 +115,10 @@ conta dela. Faça nesta ordem:
    problema (nada muda na segunda vez). Se o e-mail não existir, aborta sem alterar nada.
 7. Confira o saldo do banco de horas e o calendário: devem estar iguais aos de antes.
 
-> ⚠️ Entre o passo 3 e o 5 o app fica **sem os dados dela** (a conta nova ainda
-> está vazia e o banco ainda está no formato antigo); faça os dois passos em
+> ⚠️ Entre o passo 3 e o 6 o app fica **sem os dados dela** (a conta nova ainda
+> está vazia e o banco ainda está no formato antigo); faça esses passos em
 > poucos minutos. Nesse intervalo o cadastro pode avisar que não conseguiu
-> preparar a conta: é esperado, a migração do passo 5 resolve.
+> preparar a conta: é esperado, a migração do passo 6 resolve.
 
 ## Ajustando as regras (página "Configurações")
 
