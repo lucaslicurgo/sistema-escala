@@ -164,16 +164,37 @@ def tela_ponto(request: Request):
 
 
 @router.post("/ponto/entrei")
-def entrei(request: Request):
+def entrei(request: Request, hora: str = Form("")):
+    """Entrei agora — ou, com `hora`, a entrada esquecida de hoje."""
     try:
         repo = repo_de(request)
         agora = ponto.agora()
         if repo.turno_aberto() or repo.registro_do_dia(agora.strftime("%Y-%m-%d")):
             return redir(DESTINO, aviso="Você já marcou a entrada.")
-        repo.inserir_registro(ponto.acao_entrei(agora))
-        return redir(DESTINO, aviso=f"Entrada marcada às {agora.strftime('%H:%M')}.")
+        dados = ponto.acao_entrei_as(hora, agora) if hora.strip() else ponto.acao_entrei(agora)
+        repo.inserir_registro(dados)
+        return redir(DESTINO, aviso=f"Entrada marcada às {dados['entrada']}.")
+    except ponto.PontoErro as e:
+        return redir(DESTINO, erro=str(e))
     except Exception as e:
         return redir(DESTINO, erro=f"Não consegui marcar: {msg_de_erro(e)}")
+
+
+@router.post("/ponto/entrada")
+def corrigir_entrada(request: Request, hora: str = Form("")):
+    try:
+        repo = repo_de(request)
+        agora = ponto.agora()
+        turno = repo.turno_aberto()
+        if not turno or ponto.estado(turno, agora) not in ("trabalhando", "pausa"):
+            return redir(DESTINO, aviso="Nenhum turno aberto para corrigir.")
+        dados = ponto.acao_corrigir_entrada(turno, hora, agora)
+        repo.atualizar_registro(turno["id"], dados)
+        return redir(DESTINO, aviso=f"Entrada corrigida para {dados['entrada']}.")
+    except ponto.PontoErro as e:
+        return redir(DESTINO, erro=str(e))
+    except Exception as e:
+        return redir(DESTINO, erro=f"Não consegui corrigir: {msg_de_erro(e)}")
 
 
 def _aplicar_no_turno(request: Request, acao, estados_ok: tuple[str, ...], ok: str, recusa: str):

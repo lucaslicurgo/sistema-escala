@@ -176,3 +176,38 @@ def test_livre_saudacao_e_jornada(client_logado, fake_db, relogio):
     relogio(2026, 11, 4, 7, 0)
     t = client_logado("uid-a", nome="Julia Souza").get("/ponto").text
     assert "Bom dia, Julia" in t and "de 10h00 de jornada" in t and "Quarta, 4 de novembro" in t
+
+
+def test_esqueci_de_marcar_entrada(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 9, 30)
+    assert "Esqueci de marcar" in c.get("/ponto").text
+    r = c.post("/ponto/entrei", data={"hora": "08:00"}, follow_redirects=False)
+    assert "Entrada marcada às 08:00" in unquote(r.headers["location"])
+    reg = Repo("uid-a").registros()[0]
+    assert (reg["data"], reg["entrada"]) == ("2026-11-04", "08:00")
+
+
+def test_esqueci_de_marcar_entrada_no_futuro(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 9, 30)
+    r = c.post("/ponto/entrei", data={"hora": "10:00"}, follow_redirects=False)
+    assert "ainda não chegou" in unquote(r.headers["location"])
+    assert Repo("uid-a").registros() == []
+
+
+def test_corrigir_entrada_trabalhando(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 9, 30); c.post("/ponto/entrei")
+    relogio(2026, 11, 4, 10, 0)
+    assert "Corrigir horário de entrada" in c.get("/ponto").text
+    r = c.post("/ponto/entrada", data={"hora": "08:00"}, follow_redirects=False)
+    assert "Entrada corrigida para 08:00" in unquote(r.headers["location"])
+    assert Repo("uid-a").registros()[0]["entrada"] == "08:00"
+
+
+def test_corrigir_entrada_sem_turno_nao_faz_nada(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 9, 30)
+    r = c.post("/ponto/entrada", data={"hora": "08:00"}, follow_redirects=False)
+    assert r.status_code == 303 and Repo("uid-a").registros() == []

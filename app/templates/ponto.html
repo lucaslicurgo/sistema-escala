@@ -26,6 +26,18 @@
 </form>
 {% endmacro %}
 
+{# Formulário de horário recolhido (abre ao tocar; funciona sem JS) #}
+{% macro form_hora(acao, resumo, botao_txt, valor='') %}
+<details class="group w-full">
+  <summary class="list-none cursor-pointer text-center text-sm font-semibold text-brand-700 underline py-2 [&::-webkit-details-marker]:hidden">{{ resumo }}</summary>
+  <form method="post" action="/ponto/{{ acao }}" data-um-toque class="mt-2 flex gap-2 items-stretch">
+    <label class="sr-only" for="hora-{{ acao }}">Horário</label>
+    <input id="hora-{{ acao }}" type="time" name="hora" value="{{ valor }}" required class="flex-1 min-w-0 h-14 text-xl text-center rounded-xl border-2 border-brand-600 dark:border-brand-400 bg-white font-mono-numbers font-bold">
+    <button type="submit" class="h-14 px-5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold disabled:opacity-60">{{ botao_txt }}</button>
+  </form>
+</details>
+{% endmacro %}
+
 {% macro fatia(rotulo, valor, cor='text-slate-900') %}
 <div class="px-3.5 py-3 min-w-0">
   <p class="text-xs text-slate-500">{{ rotulo }}</p>
@@ -69,7 +81,9 @@
           <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>
           Entrei
         {% endcall %}
-        <p class="text-center text-sm text-slate-500">Marca o horário de agora · <a href="/dashboard" class="text-brand-700 underline">lançar outro horário</a></p>
+        <p class="text-center text-sm text-slate-500">Marca o horário de agora.</p>
+        {{ form_hora('entrei', 'Esqueci de marcar — entrei às…', 'Salvar entrada') }}
+        <p class="text-center text-xs text-slate-500">Dia inteiro esquecido? <a href="/dashboard" class="text-brand-700 underline">Lance entrada e saída no Início</a></p>
       </div>
 
     {% elif estado == 'livre' and fechado_hoje %}
@@ -100,6 +114,7 @@
           {{ fatia('Pausas', pausas, 'text-slate-500' if pausa_min == 0 else 'text-slate-900') }}
           {{ fatia('Sem extra até', sem_extra_ate or 'já passou') }}
         </div>
+        {{ form_hora('entrada', 'Corrigir horário de entrada', 'Salvar', entrada) }}
       </div>
       <div class="grid grid-cols-2 gap-3 md:max-w-md md:mx-auto md:w-full">
         {% call botao('pausa', 'bg-white border-2 border-brand-600 dark:border-brand-400 text-brand-700 hover:bg-brand-50') %}
@@ -125,6 +140,7 @@
           {{ fatia('Pausa', pausa_desde ~ ' –', 'text-coral-600') }}
           {{ fatia('Pausas antes', pausas, 'text-slate-500' if pausa_min == 0 else 'text-slate-900') }}
         </div>
+        {{ form_hora('entrada', 'Corrigir horário de entrada', 'Salvar', entrada) }}
       </div>
       <div class="space-y-1 md:max-w-md md:mx-auto md:w-full">
         {% call botao('voltei', 'bg-brand-600 hover:bg-brand-700 text-white', fonte='text-[22px]') %}

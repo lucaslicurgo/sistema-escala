@@ -79,3 +79,49 @@ def test_sai_com_duracao_nao_positiva():
 
 def test_desfazer_saida():
     assert acao_desfazer_saida() == {"saida": None}
+
+
+# --- entrada esquecida / corrigida -------------------------------------------
+from app.ponto import acao_corrigir_entrada, acao_entrei_as
+
+
+def test_entrei_as_horario_passado():
+    t = acao_entrei_as("08:00", sp(2026, 11, 10, 9, 30))
+    assert (t["data"], t["entrada"], t["saida"]) == ("2026-11-10", "08:00", None)
+
+
+def test_entrei_as_futuro_recusa():
+    with pytest.raises(PontoErro, match="ainda não chegou"):
+        acao_entrei_as("10:00", sp(2026, 11, 10, 9, 30))
+
+
+def test_entrei_as_formato_invalido():
+    with pytest.raises(PontoErro):
+        acao_entrei_as("xx", sp(2026, 11, 10, 9, 30))
+
+
+def test_corrigir_entrada_para_mais_cedo():
+    t = acao_entrei(sp(2026, 11, 10, 9, 30))
+    t |= acao_corrigir_entrada(t, "08:00", sp(2026, 11, 10, 10, 0))
+    assert t["entrada"] == "08:00"
+    assert minutos_trabalhados(t, sp(2026, 11, 10, 10, 0)) == 120
+
+
+def test_corrigir_entrada_futuro_recusa():
+    t = acao_entrei(sp(2026, 11, 10, 8, 0))
+    with pytest.raises(PontoErro, match="ainda não chegou"):
+        acao_corrigir_entrada(t, "11:00", sp(2026, 11, 10, 10, 0))
+
+
+def test_corrigir_entrada_depois_da_pausa_recusa():
+    t = acao_entrei(sp(2026, 11, 10, 8, 0))
+    t |= acao_pausa(t, sp(2026, 11, 10, 9, 0))
+    with pytest.raises(PontoErro, match="antes da pausa"):
+        acao_corrigir_entrada(t, "09:30", sp(2026, 11, 10, 10, 0))
+
+
+def test_corrigir_entrada_turno_noturno():
+    t = acao_entrei(sp(2026, 11, 10, 22, 30))
+    t |= acao_corrigir_entrada(t, "22:00", sp(2026, 11, 11, 1, 0))
+    assert t["entrada"] == "22:00"
+    assert minutos_trabalhados(t, sp(2026, 11, 11, 1, 0)) == 180

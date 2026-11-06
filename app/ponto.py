@@ -67,6 +67,39 @@ def acao_entrei(agora: datetime) -> dict:
     }
 
 
+def _hora_valida(hora: str) -> str:
+    minutos = calculo.parse_hhmm((hora or "").strip())
+    if minutos is None or not (0 <= minutos < 24 * 60) or ":" not in hora:
+        raise PontoErro("Informe a hora no formato HH:MM.")
+    return f"{minutos // 60:02d}:{minutos % 60:02d}"
+
+
+def acao_entrei_as(hora: str, agora: datetime) -> dict:
+    """Entrada esquecida: abre o turno de hoje num horário que já passou."""
+    hora = _hora_valida(hora)
+    h, m = divmod(calculo.parse_hhmm(hora), 60)
+    if agora.replace(hour=h, minute=m, second=0, microsecond=0) > agora:
+        raise PontoErro("Esse horário ainda não chegou.")
+    return {**acao_entrei(agora), "entrada": hora}
+
+
+def acao_corrigir_entrada(turno: dict, hora: str, agora: datetime) -> dict:
+    """Troca a hora de entrada do turno aberto (mesmo dia do turno)."""
+    novo = {**turno, "entrada": _hora_valida(hora)}
+    ini = inicio_do_turno(novo)
+    if ini > agora:
+        raise PontoErro("Esse horário ainda não chegou.")
+    if agora - ini > timedelta(minutes=LIMITE_ESQUECIDO_MIN):
+        raise PontoErro("Esse horário é muito antigo para um turno aberto.")
+    if novo.get("pausa_inicio"):
+        pausa = inicio_do_turno({**novo, "entrada": novo["pausa_inicio"]})
+        if pausa < ini:
+            pausa += timedelta(days=1)
+        if pausa > agora:
+            raise PontoErro("A entrada precisa ser antes da pausa.")
+    return {"entrada": novo["entrada"]}
+
+
 def acao_pausa(turno: dict, agora: datetime) -> dict:
     if turno.get("pausa_inicio"):
         raise PontoErro("Já está em pausa.")
