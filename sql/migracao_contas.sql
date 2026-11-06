@@ -78,3 +78,5 @@ begin
 
   raise notice 'Migração concluída para % (%).', email_julia, uid;
 end $$;
+
+notify pgrst, 'reload schema';

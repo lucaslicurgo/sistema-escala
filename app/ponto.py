@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Literal
 from zoneinfo import ZoneInfo
+
+from . import calculo
 
 FUSO = ZoneInfo("America/Sao_Paulo")
 
@@ -11,11 +14,6 @@ FUSO = ZoneInfo("America/Sao_Paulo")
 def agora() -> datetime:
     return datetime.now(FUSO)
 
-
-from datetime import timedelta
-from typing import Literal
-
-from . import calculo
 
 LIMITE_ESQUECIDO_MIN = 20 * 60
 

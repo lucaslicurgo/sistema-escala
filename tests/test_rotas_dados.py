@@ -43,3 +43,13 @@ def test_configuracoes_e_feriado_por_pessoa(client_logado, fake_db):
     assert [f["nome"] for f in Repo("uid-a").feriados()] == ["Natal"]
     assert Repo("uid-b").feriados() == []
     assert c.get("/configuracoes").status_code == 200
+
+
+def test_editar_registro_aberto_em_pausa_limpa_pausa_inicio(client_logado, fake_db):
+    reg = Repo("uid-a").inserir_registro(
+        {"data": "2026-11-05", "entrada": "08:00", "saida": None, "pausa_min": 0, "pausa_inicio": "12:00"}
+    )
+    c = client_logado("uid-a")
+    c.post(f"/registros/{reg['id']}", data={"data": "2026-11-05", "entrada": "08:00", "saida": "17:00", "pausa_min": 30})
+    salvo = Repo("uid-a").registro(reg["id"])
+    assert salvo["saida"] == "17:00" and salvo["pausa_inicio"] is None

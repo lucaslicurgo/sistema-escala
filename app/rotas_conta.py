@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hmac
+import logging
 import os
 
 from fastapi import APIRouter, Form, Request
@@ -30,7 +31,7 @@ def _iniciar_sessao(usuario, aviso: str | None = None) -> RedirectResponse:
 
 
 def _convite_valido(informado: str) -> bool:
-    esperado = os.getenv("CODIGO_CONVITE", "")
+    esperado = (os.getenv("CODIGO_CONVITE") or "").strip()
     return bool(esperado) and hmac.compare_digest(informado.encode(), esperado.encode())
 
 
@@ -66,6 +67,7 @@ def fazer_cadastro(
     try:
         preparar_conta_nova(Repo(usuario.id))
     except Exception:
+        logging.getLogger(__name__).exception("Falha ao preparar a conta nova %s", usuario.id)
         return _iniciar_sessao(usuario, aviso=(
             "Conta criada! Não consegui carregar os feriados padrão — "
             "você pode adicioná-los em Configurações."))

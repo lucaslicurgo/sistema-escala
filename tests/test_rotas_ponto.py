@@ -115,3 +115,29 @@ def test_desfazer_turno_noturno_encerrado_hoje(client_logado, fake_db, relogio):
     relogio(2026, 11, 5, 6, 0); c.post("/ponto/sai")
     c.post("/ponto/desfazer")
     assert Repo("uid-a").registros()[0]["saida"] is None
+
+
+def test_esquecido_com_pausa_aberta_avisa_e_mostra_dia_fechado(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
+    relogio(2026, 11, 4, 12, 0); c.post("/ponto/pausa")
+    relogio(2026, 11, 5, 9, 0)
+    t = c.get("/ponto").text
+    assert "A pausa iniciada às 12:00 será encerrada na hora da saída." in t
+    r = c.post("/ponto/esquecido", data={"saida": "18:00"}, follow_redirects=False)
+    assert "Dia fechado" in unquote(r.headers["location"])
+
+
+def test_esquecido_sem_pausa_nao_mostra_aviso_de_pausa(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
+    relogio(2026, 11, 5, 9, 0)
+    assert "será encerrada na hora da saída" not in c.get("/ponto").text
+
+
+def test_pausa_mostra_tempo_trabalhado(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
+    relogio(2026, 11, 4, 10, 0); c.post("/ponto/pausa")
+    relogio(2026, 11, 4, 10, 10)
+    assert "Trabalhado hoje: 2h 00" in c.get("/ponto").text

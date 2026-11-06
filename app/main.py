@@ -15,11 +15,10 @@ from . import calculo, ponto, sessao
 from .rotas_conta import router as rotas_conta
 from .rotas_ponto import router as rotas_ponto
 from .repo import Repo
-from .web import msg_de_erro, redir, render, repo_de, templates
+from .web import msg_de_erro, redir, render, repo_de
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent
 PROJETO_DIR = Path(__file__).resolve().parent.parent
 
 MESES = [
@@ -267,6 +266,7 @@ async def salvar_registro(
             "saida": saida,
             "pausa_min": max(0, pausa_min),
             "observacao": observacao.strip() or None,
+            "pausa_inicio": None,
         }
         calculo.calcular_registro(registro, set(), calculo.DEFAULT_CONFIG)
         if not repo_de(request).atualizar_registro(registro_id, registro):

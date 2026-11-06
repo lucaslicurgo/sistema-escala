@@ -30,12 +30,12 @@ def _com_sinal(minutos: int) -> str:
     return texto if texto.startswith("-") else "+" + texto
 
 
-def _desfazivel(repo, hoje: date) -> dict | None:
-    """Último registro, se fechado e encerrado hoje (turno de hoje ou noturno que acabou hoje)."""
-    if repo.turno_aberto():
-        return None
-    regs = repo.registros()
-    if not regs:
+def _desfazivel(regs: list[dict], hoje: date) -> dict | None:
+    """Último registro, se fechado e encerrado hoje (turno de hoje ou noturno que acabou hoje).
+
+    `regs` vem ordenado do mais recente para o mais antigo.
+    """
+    if not regs or _turno_aberto_de(regs):
         return None
     reg = regs[0]
     if not calculo.registro_fechado(reg):
@@ -49,6 +49,11 @@ def _desfazivel(repo, hoje: date) -> dict | None:
     return None
 
 
+def _turno_aberto_de(regs: list[dict]) -> dict | None:
+    """Registro mais recente sem saída (mesma regra de `repo.turno_aberto()`)."""
+    return next((r for r in regs if r.get("saida") is None), None)
+
+
 @router.get("/ponto")
 def tela_ponto(request: Request):
     ctx: dict = {"estado": "livre", "saldo_min": 0}
@@ -56,10 +61,14 @@ def tela_ponto(request: Request):
         repo = repo_de(request)
         agora = ponto.agora()
         hoje = agora.date()
-        turno = repo.turno_aberto()
+        regs = repo.registros()
+        comps = repo.compensacoes()
+        feriados = _feriados(repo)
+        cfg = repo.config()
+        turno = _turno_aberto_de(regs)
         est = ponto.estado(turno, agora)
         ctx["estado"] = est
-        ctx["saldo_min"] = _saldo(repo)
+        ctx["saldo_min"] = calculo.resumo_banco(regs, comps, feriados, cfg)[0]
         ctx["turno"] = turno
         if turno:
             ini = ponto.inicio_do_turno(turno)
@@ -71,16 +80,16 @@ def tela_ponto(request: Request):
             mins = ponto.minutos_trabalhados(turno, agora)
             ctx["trabalhado"] = f"{mins // 60}h {mins % 60:02d}"
         else:
-            reg_hoje = repo.registro_do_dia(hoje.isoformat())
+            reg_hoje = next((r for r in regs if r["data"] == hoje.isoformat()), None)
             ctx["fechado_hoje"] = reg_hoje if reg_hoje and calculo.registro_fechado(reg_hoje) else None
             if ctx["fechado_hoje"]:
-                calc = calculo.calcular_registro(ctx["fechado_hoje"], _feriados(repo), repo.config())
+                calc = calculo.calcular_registro(ctx["fechado_hoje"], feriados, cfg)
                 ctx["resumo"] = {
                     "pausa": calculo.hhmm(int(ctx["fechado_hoje"].get("pausa_min") or 0)),
                     "total": calculo.hhmm(calc["duracao_min"]),
                     "extra": _com_sinal(calc["extras_min"]),
                 }
-            ctx["desfazivel"] = _desfazivel(repo, hoje)
+            ctx["desfazivel"] = _desfazivel(regs, hoje)
     except Exception as e:
         ctx["db_erro"] = msg_de_erro(e)
     return render(request, "ponto.html", **ctx)
@@ -136,6 +145,11 @@ def _fechar(repo, turno: dict, hora: str):
     return {**turno, **dados}
 
 
+def _msg_dia_fechado(repo, fechado: dict) -> str:
+    calc = calculo.calcular_registro(fechado, _feriados(repo), repo.config())
+    return f"Dia fechado: {_com_sinal(calc['extras_min'])} de extra · saldo {_com_sinal(_saldo(repo))}"
+
+
 @router.post("/ponto/sai")
 def sai(request: Request):
     try:
@@ -147,11 +161,7 @@ def sai(request: Request):
         if ponto.estado(turno, agora) == "esquecido":
             return redir(DESTINO, aviso="Informe primeiro a hora da saída esquecida.")
         fechado = _fechar(repo, turno, agora.strftime("%H:%M"))
-        calc = calculo.calcular_registro(fechado, _feriados(repo), repo.config())
-        return redir(
-            DESTINO,
-            aviso=f"Dia fechado: {_com_sinal(calc['extras_min'])} de extra · saldo {_com_sinal(_saldo(repo))}",
-        )
+        return redir(DESTINO, aviso=_msg_dia_fechado(repo, fechado))
     except ponto.PontoErro:
         return redir(DESTINO, erro="Esse horário de saída não fecha com a entrada.")
     except Exception as e:
@@ -168,10 +178,10 @@ def esquecido(request: Request, saida: str = Form("")):
         if calculo.parse_hhmm(saida.strip()) is None:
             return redir(DESTINO, erro="Informe a hora no formato HH:MM.")
         try:
-            _fechar(repo, turno, saida.strip())
+            fechado = _fechar(repo, turno, saida.strip())
         except ponto.PontoErro:
             return redir(DESTINO, erro="Esse horário de saída não fecha com a entrada.")
-        return redir(DESTINO, aviso="Saída salva.")
+        return redir(DESTINO, aviso=_msg_dia_fechado(repo, fechado))
     except Exception as e:
         return redir(DESTINO, erro=f"Não consegui salvar: {msg_de_erro(e)}")
 
@@ -180,7 +190,7 @@ def esquecido(request: Request, saida: str = Form("")):
 def desfazer(request: Request):
     try:
         repo = repo_de(request)
-        reg = _desfazivel(repo, ponto.agora().date())
+        reg = _desfazivel(repo.registros(), ponto.agora().date())
         if not reg:
             return redir(DESTINO, aviso="Não há saída para desfazer.")
         repo.atualizar_registro(reg["id"], ponto.acao_desfazer_saida())

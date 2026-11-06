@@ -47,6 +47,7 @@
   {% elif estado == 'pausa' %}
     <section class="text-center py-2">
       <h1 class="text-xl font-bold text-slate-900">Em pausa desde {{ pausa_desde }}</h1>
+      <p class="text-sm text-slate-700 mt-1">Trabalhado hoje: {{ trabalhado }}</p>
       <p class="text-sm text-slate-500 mt-1">entrou às {{ entrada }}</p>
     </section>
     {{ botao('voltei', 'Voltei', 'bg-brand-600 hover:bg-brand-700', 'h-24 text-3xl') }}
@@ -55,6 +56,9 @@
   {% elif estado == 'esquecido' %}
     <section class="bg-white rounded-2xl border border-amber-200 p-5 shadow-subtle">
       <h1 class="text-lg font-bold text-slate-900">Você não marcou a saída de {{ data_turno }}. Que horas saiu?</h1>
+      {% if pausa_desde %}
+      <p class="mt-2 text-sm text-amber-700">A pausa iniciada às {{ pausa_desde }} será encerrada na hora da saída.</p>
+      {% endif %}
       <form method="post" action="/ponto/esquecido" data-um-toque class="mt-4 space-y-3">
         <input type="time" name="saida" required class="w-full h-16 text-2xl text-center rounded-xl border border-slate-300 font-mono-numbers">
         <button type="submit" class="w-full h-16 rounded-2xl text-xl font-extrabold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-60">Salvar</button>

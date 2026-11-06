@@ -108,10 +108,12 @@ conta dela. Faça nesta ordem:
    `<APP_URL>/redefinir-senha`. Essa lista é o que protege o link de recuperar senha.
 3. Faça o deploy da nova versão.
 4. A Julia cria a conta em `/cadastro` (com o código de convite).
-5. No Supabase → **SQL Editor**, cole `sql/migracao_contas.sql`, troque
+5. Antes de migrar, faça backup: no Supabase → **Table Editor**, exporte como CSV
+   (**Export**) as 4 tabelas: `registros`, `compensacoes`, `configuracoes` e `feriados`.
+6. No Supabase → **SQL Editor**, cole `sql/migracao_contas.sql`, troque
    `COLOQUE-O-EMAIL-DA-JULIA` pelo e-mail dela e rode. Pode rodar de novo sem
    problema (nada muda na segunda vez). Se o e-mail não existir, aborta sem alterar nada.
-6. Confira o saldo do banco de horas e o calendário: devem estar iguais aos de antes.
+7. Confira o saldo do banco de horas e o calendário: devem estar iguais aos de antes.
 
 > ⚠️ Entre o passo 3 e o 5 o app fica **sem os dados dela** (a conta nova ainda
 > está vazia e o banco ainda está no formato antigo); faça os dois passos em
@@ -139,7 +141,14 @@ adicione/remova livremente na mesma página.
 escala-julia/
 ├── app/
 │   ├── main.py              # rotas (dashboard, registros, compensações, config)
-│   ├── auth.py              # contas (Supabase Auth): cadastro, login, recuperar senha
+│   ├── sessao.py            # cookie de sessão assinado
+│   ├── supabase_auth.py     # Supabase Auth: cadastro, login, recuperar senha
+│   ├── rotas_conta.py       # rotas de login, cadastro, recuperação de senha e logout
+│   ├── contas.py            # preparação de conta nova (feriados padrão)
+│   ├── repo.py              # acesso aos dados de uma pessoa (filtra por user_id)
+│   ├── web.py               # helpers de rota: render, redir, repo_de, mensagens de erro
+│   ├── ponto.py             # relógio e regras do turno (pausa, noturno, esquecimento)
+│   ├── rotas_ponto.py       # tela /ponto e botões de um toque
 │   ├── calculo.py           # regras de horas extras e banco de horas
 │   ├── supabase_client.py   # acesso ao Supabase via REST
 │   └── templates/           # páginas HTML
