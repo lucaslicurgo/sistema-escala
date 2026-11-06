@@ -72,10 +72,15 @@
 <script>
   (function () {
     document.querySelectorAll('form[data-um-toque]').forEach(function (f) {
-      f.addEventListener('submit', function () {
+      f.addEventListener('submit', function (e) {
+        if (e.defaultPrevented) return; // confirm() cancelado: não trava o botão
         var b = f.querySelector('button[type="submit"]');
         if (b) setTimeout(function () { b.disabled = true; }, 0);
       });
+    });
+    // voltar pelo histórico (bfcache) restaura a página com botões travados
+    window.addEventListener('pageshow', function () {
+      document.querySelectorAll('form[data-um-toque] button[type="submit"]').forEach(function (b) { b.disabled = false; });
     });
     var el = document.getElementById('contador');
     if (!el) return;
