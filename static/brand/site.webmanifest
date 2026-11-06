@@ -20,5 +20,7 @@
   ],
   "theme_color": "#0B555A",
   "background_color": "#0B555A",
+  "start_url": "/ponto",
+  "scope": "/",
   "display": "standalone"
 }

@@ -36,9 +36,10 @@
 </head>
 <body class="min-h-screen text-slate-800 antialiased flex flex-col">
 {% set path = request.url.path %}
+{% set em_ponto = path.startswith('/ponto') %}
 {% set em_cal = path.startswith('/calendario') %}
 {% set em_conf = path.startswith('/configuracoes') %}
-{% set em_dash = not (em_cal or em_conf) %}
+{% set em_dash = not (em_ponto or em_cal or em_conf) %}
 
 <!-- Cabeçalho -->
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200/80 shadow-xs">
@@ -55,6 +56,9 @@
       </div>
 
       <nav class="hidden md:flex items-center space-x-1">
+        <a aria-current="{{ 'page' if em_ponto else 'false' }}"
+           class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 shadow-sm' if em_ponto else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
+           href="/ponto">Ponto</a>
         <a aria-current="{{ 'page' if em_dash else 'false' }}"
            class="px-3 py-2 text-sm font-medium rounded-lg {{ 'text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 shadow-sm' if em_dash else 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors' }}"
            href="/dashboard">Dashboard</a>
@@ -149,6 +153,11 @@
 
 <!-- Barra de navegação inferior (só mobile) -->
 <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 flex" style="padding-bottom: env(safe-area-inset-bottom)">
+  <a href="/ponto" aria-current="{{ 'page' if em_ponto else 'false' }}"
+     class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-brand-700' if em_ponto else 'text-slate-500' }}">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ '2.2' if em_ponto else '1.8' }}"></path></svg>
+    Ponto
+  </a>
   <a href="/dashboard" aria-current="{{ 'page' if em_dash else 'false' }}"
      class="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium {{ 'text-brand-700' if em_dash else 'text-slate-500' }}">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ '2.2' if em_dash else '1.8' }}"></path></svg>

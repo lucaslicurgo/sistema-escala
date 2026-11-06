@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block titulo %}Ponto · Chronos{% endblock %}
+{% block conteudo %}
+{% set saldo_positivo = saldo_min >= 0 %}
+{% macro botao(acao, texto, cor, tamanho='h-20 text-2xl') %}
+<form method="post" action="/ponto/{{ acao }}" data-um-toque>
+  <button type="submit" class="w-full {{ tamanho }} rounded-2xl font-extrabold text-white shadow-card active:scale-[0.98] transition disabled:opacity-60 {{ cor }}">{{ texto }}</button>
+</form>
+{% endmacro %}
+
+<div class="max-w-md mx-auto space-y-4">
+  <!-- Saldo -->
+  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle flex items-center justify-between">
+    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Saldo do banco</span>
+    <span class="text-2xl font-extrabold font-mono-numbers {{ 'text-positive-600' if saldo_positivo else 'text-rose-600' }}">{{ saldo_min|hhmm }}</span>
+  </div>
+
+  {% if estado == 'livre' %}
+    {% if fechado_hoje %}
+      <section class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle">
+        <h1 class="text-lg font-bold text-slate-900">Dia fechado</h1>
+        <dl class="mt-3 grid grid-cols-2 gap-y-2 text-sm">
+          <dt class="text-slate-500">Horário</dt><dd class="text-right font-semibold font-mono-numbers">{{ fechado_hoje.entrada }} – {{ fechado_hoje.saida }}</dd>
+          <dt class="text-slate-500">Pausa</dt><dd class="text-right font-semibold font-mono-numbers">{{ resumo.pausa }}</dd>
+          <dt class="text-slate-500">Total</dt><dd class="text-right font-semibold font-mono-numbers">{{ resumo.total }}</dd>
+          <dt class="text-slate-500">Extra</dt><dd class="text-right font-semibold font-mono-numbers">{{ resumo.extra }}</dd>
+        </dl>
+      </section>
+    {% else %}
+      <h1 class="sr-only">Ponto</h1>
+      {{ botao('entrei', 'Entrei', 'bg-brand-600 hover:bg-brand-700', 'h-24 text-3xl') }}
+    {% endif %}
+    {% if desfazivel %}
+      <form method="post" action="/ponto/desfazer" data-um-toque onsubmit="return confirm('Desfazer a saída e voltar a trabalhar?')" class="text-center">
+        <button type="submit" class="text-sm text-slate-500 underline py-3 px-4">Desfazer saída</button>
+      </form>
+    {% endif %}
+
+  {% elif estado == 'trabalhando' %}
+    <section class="text-center py-2">
+      <h1 class="text-xl font-bold text-slate-900"><span id="contador" data-inicio="{{ inicio_iso }}" data-pausa="{{ pausa_min }}">Trabalhando há {{ trabalhado }}</span></h1>
+      <p class="text-sm text-slate-500 mt-1">entrou às {{ entrada }}</p>
+    </section>
+    {{ botao('pausa', 'Pausa', 'bg-amber-500 hover:bg-amber-600') }}
+    {{ botao('sai', 'Saí', 'bg-rose-600 hover:bg-rose-700') }}
+
+  {% elif estado == 'pausa' %}
+    <section class="text-center py-2">
+      <h1 class="text-xl font-bold text-slate-900">Em pausa desde {{ pausa_desde }}</h1>
+      <p class="text-sm text-slate-500 mt-1">entrou às {{ entrada }}</p>
+    </section>
+    {{ botao('voltei', 'Voltei', 'bg-brand-600 hover:bg-brand-700', 'h-24 text-3xl') }}
+    {{ botao('sai', 'Saí', 'bg-rose-600 hover:bg-rose-700', 'h-16 text-lg') }}
+
+  {% elif estado == 'esquecido' %}
+    <section class="bg-white rounded-2xl border border-amber-200 p-5 shadow-subtle">
+      <h1 class="text-lg font-bold text-slate-900">Você não marcou a saída de {{ data_turno }}. Que horas saiu?</h1>
+      <form method="post" action="/ponto/esquecido" data-um-toque class="mt-4 space-y-3">
+        <input type="time" name="saida" required class="w-full h-16 text-2xl text-center rounded-xl border border-slate-300 font-mono-numbers">
+        <button type="submit" class="w-full h-16 rounded-2xl text-xl font-extrabold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-60">Salvar</button>
+      </form>
+    </section>
+  {% endif %}
+
+  <p class="text-center pt-2">
+    <a href="/dashboard" class="text-sm text-slate-500 underline py-3 inline-block">lançar/corrigir manualmente</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    document.querySelectorAll('form[data-um-toque]').forEach(function (f) {
+      f.addEventListener('submit', function () {
+        var b = f.querySelector('button[type="submit"]');
+        if (b) setTimeout(function () { b.disabled = true; }, 0);
+      });
+    });
+    var el = document.getElementById('contador');
+    if (!el) return;
+    var ini = new Date(el.dataset.inicio).getTime(), pausa = parseInt(el.dataset.pausa, 10) || 0;
+    function atualizar() {
+      var m = Math.max(0, Math.floor((Date.now() - ini) / 60000) - pausa);
+      el.textContent = 'Trabalhando há ' + Math.floor(m / 60) + 'h ' + String(m % 60).padStart(2, '0');
+    }
+    atualizar();
+    setInterval(atualizar, 30000);
+  })();
+</script>
+{% endblock %}

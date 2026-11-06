@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import calculo, ponto, sessao
 from .rotas_conta import router as rotas_conta
+from .rotas_ponto import router as rotas_ponto
 from .repo import Repo
 from .web import msg_de_erro, redir, render, repo_de, templates
 
@@ -29,6 +30,7 @@ DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Dom
 
 app = FastAPI(title="Chronos", docs_url=None, redoc_url=None, openapi_url=None)
 app.include_router(rotas_conta)
+app.include_router(rotas_ponto)
 app.mount("/static", StaticFiles(directory=str(PROJETO_DIR / "static")), name="static")
 
 
@@ -79,7 +81,7 @@ def healthz():
 
 @app.get("/")
 def raiz():
-    return RedirectResponse("/dashboard", status_code=303)
+    return RedirectResponse("/ponto", status_code=303)
 
 
 # ------------------------------------------------------------------ dashboard

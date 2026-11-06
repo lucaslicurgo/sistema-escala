@@ -57,7 +57,7 @@ def test_login_ok_e_acesso_ao_sistema(client, fake_auth, fake_db, monkeypatch):
     _cadastro(client, convite="c")
     client.cookies.clear()
     r = client.post("/login", data={"email": " A@B.C ", "senha": "123456"}, follow_redirects=False)
-    assert r.status_code == 303 and r.headers["location"] == "/dashboard"
+    assert r.status_code == 303 and r.headers["location"] == "/ponto"
     assert "httponly" in r.headers["set-cookie"].lower()
     assert client.get("/healthz").status_code == 200
     assert client.get("/dashboard", follow_redirects=False).status_code != 303

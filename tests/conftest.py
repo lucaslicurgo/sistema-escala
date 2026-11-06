@@ -172,3 +172,18 @@ def client_logado(client):
         return client
 
     return _logar
+
+
+@pytest.fixture
+def relogio(monkeypatch):
+    """relogio(ano, mes, dia, hora, minuto) fixa ponto.agora() nesse instante em SP."""
+    from datetime import datetime
+
+    from app import ponto
+
+    def _fixar(ano, mes, dia, hora=0, minuto=0):
+        instante = datetime(ano, mes, dia, hora, minuto, tzinfo=ponto.FUSO)
+        monkeypatch.setattr(ponto, "agora", lambda: instante)
+        return instante
+
+    return _fixar

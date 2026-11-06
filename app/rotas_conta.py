@@ -16,7 +16,7 @@ from .web import redir, render
 
 router = APIRouter()
 
-DESTINO_POS_LOGIN = "/dashboard"  # a Task 6 troca para /ponto
+DESTINO_POS_LOGIN = "/ponto"
 
 
 def _iniciar_sessao(usuario, aviso: str | None = None) -> RedirectResponse:
