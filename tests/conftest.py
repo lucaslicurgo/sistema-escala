@@ -108,3 +108,67 @@ def fake_db(monkeypatch):
     banco = FakeDB()
     monkeypatch.setattr("app.repo.db", banco)
     return banco
+
+
+class FakeAuth:
+    """Supabase Auth em memória (substitui cadastrar/entrar/... do módulo)."""
+
+    def __init__(self) -> None:
+        self.usuarios: dict[str, Any] = {}
+        self.senhas: dict[str, str] = {}
+        self.recuperacoes: list[tuple[str, str]] = []
+        self.trocas: list[tuple[str, str]] = []
+
+    def cadastrar(self, email, senha, nome):
+        from app.supabase_auth import AuthErro, Usuario
+
+        email = email.strip().lower()
+        if email in self.usuarios:
+            raise AuthErro("Esse e-mail já tem conta. Tente entrar.")
+        usuario = Usuario(id=f"uid-{len(self.usuarios) + 1}", email=email, nome=nome)
+        self.usuarios[email] = usuario
+        self.senhas[email] = senha
+        return usuario
+
+    def entrar(self, email, senha):
+        from app.supabase_auth import AuthErro
+
+        email = email.strip().lower()
+        if self.senhas.get(email) != senha or email not in self.usuarios:
+            raise AuthErro("E-mail ou senha incorretos.")
+        return self.usuarios[email]
+
+    def enviar_recuperacao(self, email, redirect_to):
+        self.recuperacoes.append((email, redirect_to))
+
+    def trocar_senha(self, access_token, nova):
+        self.trocas.append((access_token, nova))
+
+
+@pytest.fixture
+def fake_auth(monkeypatch):
+    auth = FakeAuth()
+    for nome in ("cadastrar", "entrar", "enviar_recuperacao", "trocar_senha"):
+        monkeypatch.setattr(f"app.supabase_auth.{nome}", getattr(auth, nome))
+    return auth
+
+
+@pytest.fixture
+def client():
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    return TestClient(app)
+
+
+@pytest.fixture
+def client_logado(client):
+    """Fábrica: client_logado(uid) devolve o client com cookie de sessão válido."""
+    from app import sessao
+
+    def _logar(uid: str, email: str = "a@b.c", nome: str = "Ana"):
+        client.cookies.set(sessao.COOKIE, sessao.criar(uid, email, nome))
+        return client
+
+    return _logar

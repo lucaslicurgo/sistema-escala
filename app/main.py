@@ -11,9 +11,9 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import auth
-from . import calculo
-from .repo import limites_do_mes
+from . import calculo, sessao
+from .rotas_conta import router as rotas_conta
+from .repo import Repo, limites_do_mes
 from .supabase_client import db
 from .web import msg_de_erro, redir, render, templates
 
@@ -29,6 +29,7 @@ MESES = [
 DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 
 app = FastAPI(title="Chronos", docs_url=None, redoc_url=None, openapi_url=None)
+app.include_router(rotas_conta)
 app.mount("/static", StaticFiles(directory=str(PROJETO_DIR / "static")), name="static")
 
 
@@ -84,13 +85,19 @@ def infos_mes(request: Request, mes: str | None) -> tuple[date, str, str, str]:
 
 # ----------------------------------------------------------------- sessão
 
+PUBLICAS = ("/login", "/cadastro", "/esqueci", "/redefinir-senha", "/healthz", "/favicon.ico")
+
+
 @app.middleware("http")
 async def verifica_login(request: Request, call_next):
     path = request.url.path
-    if path.startswith("/static") or path.startswith("/login") or path in ("/healthz", "/favicon.ico"):
+    if path.startswith("/static") or path in PUBLICAS:
         return await call_next(request)
-    if request.cookies.get(auth.COOKIE_SESSAO, "") != auth.token_da_senha():
+    usuario = sessao.ler(request.cookies.get(sessao.COOKIE))
+    if usuario is None:
         return RedirectResponse("/login", status_code=303)
+    request.state.usuario = usuario
+    request.state.repo = Repo(usuario["uid"])
     return await call_next(request)
 
 
@@ -102,31 +109,6 @@ def healthz():
 @app.get("/")
 def raiz():
     return RedirectResponse("/dashboard", status_code=303)
-
-
-@app.get("/login")
-def pagina_login(request: Request):
-    sem_conf = auth.senha_admin() == "admin123"
-    return render(request, "login.html", db_erro=None, usando_senha_padrao=sem_conf)
-
-
-@app.post("/login")
-async def fazer_login(request: Request, senha: str = Form(...)):
-    if auth.senha_valida(senha):
-        resposta = RedirectResponse("/dashboard", status_code=303)
-        resposta.set_cookie(
-            auth.COOKIE_SESSAO, auth.token_da_senha(),
-            max_age=60 * 60 * 24 * 30, httponly=True, samesite="lax",
-        )
-        return resposta
-    return redir("/login", erro="Senha incorreta.")
-
-
-@app.post("/logout")
-def sair():
-    resposta = RedirectResponse("/login", status_code=303)
-    resposta.delete_cookie(auth.COOKIE_SESSAO)
-    return resposta
 
 
 # ------------------------------------------------------------------ dashboard

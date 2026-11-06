@@ -31,7 +31,7 @@ O projeto já tem a receita pronta (`render.yaml`):
 1. Crie conta em [render.com](https://render.com) usando **Sign in with GitHub**
 2. Painel → **New +** → **Blueprint** → autorize e escolha o repositório `sistema-escala`
 3. O Render lê o `render.yaml` e pede as **4 variáveis** (logo abaixo) — preencha com os mesmos valores do seu `.env`:
-   - `ADMIN_PASSWORD` · `SECRET_KEY` · `SUPABASE_URL` · `SUPABASE_KEY`
+   - `SECRET_KEY` · `SUPABASE_URL` · `SUPABASE_KEY` · `CODIGO_CONVITE` · `APP_URL` (opcional)
 4. **Apply** e aguarde o build (~1–2 min). O app fica em `https://sistema-escala-xxxx.onrender.com`
 
 > 💡 No plano grátis o app "dorme" após ~15 min sem uso; o primeiro acesso depois disso demora ~30–50 s para acordar.
@@ -83,7 +83,7 @@ cp .env.example .env           # Windows: copy .env.example .env
 Edite o `.env`:
 
 ```env
-ADMIN_PASSWORD=sua-senha-secreta
+CODIGO_CONVITE=seu-codigo-de-convite
 SECRET_KEY=um-texto-aleatorio-qualquer
 SUPABASE_URL=https://SEU-PROJETO.supabase.co
 SUPABASE_KEY=SUA-CHAVE-SERVICE_ROLE

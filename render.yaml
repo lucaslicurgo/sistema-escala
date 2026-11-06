@@ -13,8 +13,10 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.3"
-      # Preencha estas 4 no painel do Render (não ficam no GitHub):
-      - key: ADMIN_PASSWORD
+      # Preencha estas no painel do Render (não ficam no GitHub):
+      - key: CODIGO_CONVITE
+        sync: false
+      - key: APP_URL
         sync: false
       - key: SECRET_KEY
         sync: false
