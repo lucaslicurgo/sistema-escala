@@ -2,21 +2,20 @@
 
 from __future__ import annotations
 
-import os
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from urllib.parse import quote
 from typing import Any
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 from . import auth
 from . import calculo
+from .repo import limites_do_mes
 from .supabase_client import db
+from .web import msg_de_erro, redir, render, templates
 
 load_dotenv()
 
@@ -36,33 +35,6 @@ app.mount("/static", StaticFiles(directory=str(PROJETO_DIR / "static")), name="s
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
     return FileResponse(PROJETO_DIR / "static" / "brand" / "favicon.ico")
-
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-templates.env.filters["hhmm"] = calculo.hhmm
-
-
-# ---------------------------------------------------------------- utilidades
-
-def render(request: Request, template: str, **ctx: Any):
-    ctx.setdefault("db_erro", None)
-    ctx.setdefault("aviso", request.query_params.get("aviso"))
-    ctx.setdefault("erro", request.query_params.get("erro"))
-    ctx.setdefault("usuario", os.getenv("USER_NAME", "Julia"))
-    return templates.TemplateResponse(request, template, ctx)
-
-
-def redir(destino: str = "/dashboard", aviso: str | None = None, erro: str | None = None):
-    sep = "&" if "?" in destino else "?"
-    if aviso:
-        destino += f"{sep}aviso={quote(str(aviso))}"
-    elif erro:
-        destino += f"{sep}erro={quote(str(erro))}"
-    return RedirectResponse(destino, status_code=303)
-
-
-def msg_de_erro(e: Exception) -> str:
-    texto = str(e).strip() or type(e).__name__
-    return texto[:300]
 
 
 # ------------------------------------------------------------------- dados
@@ -93,16 +65,6 @@ def buscar_compensacoes(mes: str | None = None) -> list[dict]:
         primeiro, ultimo = limites_do_mes(mes)
         params["data"] = [f"gte.{primeiro}", f"lte.{ultimo}"]
     return db.select("compensacoes", params=params) or []
-
-
-def limites_do_mes(mes: str) -> tuple[str, str]:
-    ref = datetime.strptime(mes, "%Y-%m")
-    primeiro = ref.date().replace(day=1)
-    if ref.month == 12:
-        ultimo = date(ref.year, 12, 31)
-    else:
-        ultimo = date(ref.year, ref.month + 1, 1) - timedelta(days=1)
-    return primeiro.isoformat(), ultimo.isoformat()
 
 
 def infos_mes(request: Request, mes: str | None) -> tuple[date, str, str, str]:
