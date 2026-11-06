@@ -11,11 +11,10 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import calculo, sessao
+from . import calculo, ponto, sessao
 from .rotas_conta import router as rotas_conta
-from .repo import Repo, limites_do_mes
-from .supabase_client import db
-from .web import msg_de_erro, redir, render, templates
+from .repo import Repo
+from .web import msg_de_erro, redir, render, repo_de, templates
 
 load_dotenv()
 
@@ -40,37 +39,9 @@ def favicon():
 
 # ------------------------------------------------------------------- dados
 
-def carregar_config() -> dict[str, str]:
-    cfg = dict(calculo.DEFAULT_CONFIG)
-    for linha in db.select("configuracoes") or []:
-        cfg[linha["chave"]] = linha["valor"]
-    return cfg
-
-
-def carregar_feriados() -> tuple[list[dict], set[str]]:
-    linhas = db.select("feriados", params={"order": "data.desc"}) or []
-    return linhas, {l["data"] for l in linhas}
-
-
-def buscar_registros(mes: str | None = None) -> list[dict]:
-    params: dict[str, Any] = {"order": "data.desc", "limit": 5000}
-    if mes:
-        primeiro, ultimo = limites_do_mes(mes)
-        params["data"] = [f"gte.{primeiro}", f"lte.{ultimo}"]
-    return db.select("registros", params=params) or []
-
-
-def buscar_compensacoes(mes: str | None = None) -> list[dict]:
-    params: dict[str, Any] = {"order": "data.desc", "limit": 5000}
-    if mes:
-        primeiro, ultimo = limites_do_mes(mes)
-        params["data"] = [f"gte.{primeiro}", f"lte.{ultimo}"]
-    return db.select("compensacoes", params=params) or []
-
-
 def infos_mes(request: Request, mes: str | None) -> tuple[date, str, str, str]:
     """Retorna (ref, mes_atual, mes_anterior, mes_seguinte) como 'YYYY-MM'."""
-    hoje = date.today()
+    hoje = ponto.agora().date()
     if mes:
         try:
             hoje = datetime.strptime(mes, "%Y-%m").date()
@@ -121,7 +92,7 @@ def dashboard(request: Request, mes: str | None = None):
         "mes_label": f"{MESES[ref.month - 1]} {ref.year}",
         "mes_anterior": mes_anterior,
         "mes_seguinte": mes_seguinte,
-        "hoje": date.today().isoformat(),
+        "hoje": ponto.agora().date().isoformat(),
         "saldo_min": 0,
         "folgas": 0,
         "extras_mes": 0,
@@ -132,14 +103,15 @@ def dashboard(request: Request, mes: str | None = None):
     }
 
     try:
-        cfg = carregar_config()
-        _, feriados = carregar_feriados()
-        registros = buscar_registros(mes_atual)
-        compensacoes = buscar_compensacoes(mes_atual)
+        repo = repo_de(request)
+        cfg = repo.config()
+        feriados = {f["data"] for f in repo.feriados()}
+        registros = repo.registros(mes_atual)
+        compensacoes = repo.compensacoes(mes_atual)
 
         # Resumo com histórico completo
         saldo, folgas = calculo.resumo_banco(
-            buscar_registros(), buscar_compensacoes(), feriados, cfg
+            repo.registros(), repo.compensacoes(), feriados, cfg
         )
 
         calculados = []
@@ -147,14 +119,33 @@ def dashboard(request: Request, mes: str | None = None):
         total_horas_trab = 0
         linhas = []
         for reg in registros:
+            dia_d = date.fromisoformat(reg["data"])
+            pausa = int(reg.get("pausa_min") or 0)
+            if not calculo.registro_fechado(reg):
+                linhas.append({
+                    "tipo": "ponto",
+                    "id": reg["id"],
+                    "data_iso": reg["data"],
+                    "data": dia_d.strftime("%d/%m/%Y"),
+                    "dia": DIAS_SEMANA[dia_d.weekday()],
+                    "etiqueta": None,
+                    "entrada": reg["entrada"],
+                    "pausa": f"{calculo.hhmm(pausa)} ({pausa}m)" if pausa else "--:--",
+                    "saida": None,
+                    "aberto": True,
+                    "total": "--:--",
+                    "mov": "em andamento",
+                    "tem_extra": False,
+                    "folga": False,
+                    "obs": reg.get("observacao"),
+                })
+                continue
             calc = calculo.calcular_registro(reg, feriados, cfg)
-            calc["dia_semana"] = DIAS_SEMANA[date.fromisoformat(reg["data"]).weekday()]
+            calc["dia_semana"] = DIAS_SEMANA[dia_d.weekday()]
             calculados.append(calc)
             extras_mes += calc["extras_min"]
             total_horas_trab += calc["duracao_min"]
 
-            dia_d = date.fromisoformat(reg["data"])
-            pausa = int(reg.get("pausa_min") or 0)
             linhas.append({
                 "tipo": "ponto",
                 "id": reg["id"],
@@ -236,7 +227,11 @@ async def criar_registro(
         }
         # valida cálculo antes de salvar
         calculo.calcular_registro(registro, set(), calculo.DEFAULT_CONFIG)
-        db.insert("registros", registro)
+        repo = repo_de(request)
+        if repo.registro_do_dia(data):
+            dia = date.fromisoformat(data).strftime("%d/%m/%Y")
+            return redir(erro=f"Já existe um registro em {dia}. Edite o existente.")
+        repo.inserir_registro(registro)
         return redir(aviso=f"Registro de {data} salvo com sucesso!")
     except Exception as e:
         return redir(erro=f"Não consegui salvar: {msg_de_erro(e)}")
@@ -245,8 +240,7 @@ async def criar_registro(
 @app.get("/registros/{registro_id}")
 def editar_registro_pagina(request: Request, registro_id: int):
     try:
-        registros = buscar_registros()
-        reg = next((r for r in registros if r["id"] == registro_id), None)
+        reg = repo_de(request).registro(registro_id)
         if not reg:
             return redir(erro="Registro não encontrado.")
         return render(request, "registro_editar.html", registro=reg)
@@ -273,7 +267,8 @@ async def salvar_registro(
             "observacao": observacao.strip() or None,
         }
         calculo.calcular_registro(registro, set(), calculo.DEFAULT_CONFIG)
-        db.update("registros", {"id": registro_id}, registro)
+        if not repo_de(request).atualizar_registro(registro_id, registro):
+            return redir(erro="Registro não encontrado.")
         return redir(aviso="Registro atualizado!")
     except Exception as e:
         return redir(erro=f"Não consegui atualizar: {msg_de_erro(e)}")
@@ -282,7 +277,8 @@ async def salvar_registro(
 @app.post("/registros/{registro_id}/excluir")
 async def excluir_registro(request: Request, registro_id: int):
     try:
-        db.delete("registros", {"id": registro_id})
+        if not repo_de(request).excluir_registro(registro_id):
+            return redir(erro="Registro não encontrado.")
         return redir(aviso="Registro excluído.")
     except Exception as e:
         return redir(erro=f"Não consegui excluir: {msg_de_erro(e)}")
@@ -303,15 +299,12 @@ async def criar_compensacao(
     if tipo != "abono":
         horas_min = 0
     try:
-        db.insert(
-            "compensacoes",
-            {
-                "data": data,
-                "tipo": tipo,
-                "horas_min": max(0, horas_min),
-                "observacao": observacao.strip() or None,
-            },
-        )
+        repo_de(request).inserir_compensacao({
+            "data": data,
+            "tipo": tipo,
+            "horas_min": max(0, horas_min),
+            "observacao": observacao.strip() or None,
+        })
         rotulo = {"compensacao": "Compensação", "abono": "Abono", "folga": "Folga"}[tipo]
         return redir(aviso=f"{rotulo} lançada em {data}!")
     except Exception as e:
@@ -321,7 +314,8 @@ async def criar_compensacao(
 @app.post("/compensacoes/{comp_id}/excluir")
 async def excluir_compensacao(request: Request, comp_id: int):
     try:
-        db.delete("compensacoes", {"id": comp_id})
+        if not repo_de(request).excluir_compensacao(comp_id):
+            return redir(erro="Lançamento não encontrado.")
         return redir(aviso="Lançamento excluído.")
     except Exception as e:
         return redir(erro=f"Não consegui excluir: {msg_de_erro(e)}")
@@ -348,20 +342,28 @@ def pagina_calendario(request: Request, mes: str | None = None):
         "mes_label": f"{MESES[num - 1]} {ano}",
         "mes_anterior": mes_anterior,
         "mes_seguinte": mes_seguinte,
-        "hoje_iso": date.today().isoformat(),
+        "hoje_iso": ponto.agora().date().isoformat(),
         "celulas": celulas,
         "ciclo_ativo": False,
         "stats": {"pontos": 0, "comps": 0, "extras": 0, "folgas": 0, "sem_ponto": 0},
     }
 
     try:
-        cfg = carregar_config()
+        repo = repo_de(request)
+        cfg = repo.config()
         ctx["ciclo_ativo"] = calculo.ciclo_dados(cfg) is not None
-        feriado_rows, _ = carregar_feriados()
+        feriado_rows = repo.feriados()
         nomes_feriados = {f["data"]: f["nome"] for f in feriado_rows}
 
         dias: dict[str, dict] = {}
-        for reg in buscar_registros(mes_atual):
+        for reg in repo.registros(mes_atual):
+            if not calculo.registro_fechado(reg):
+                d = dias.setdefault(reg["data"], {"pontos": [], "comps": []})
+                d["pontos"].append({
+                    "id": reg["id"], "entrada": reg["entrada"], "saida": None,
+                    "total": "--:--", "extras": None, "folga": False, "fds": False,
+                })
+                continue
             calc = calculo.calcular_registro(reg, nomes_feriados, cfg)
             d = dias.setdefault(reg["data"], {"pontos": [], "comps": []})
             d["pontos"].append({
@@ -378,7 +380,7 @@ def pagina_calendario(request: Request, mes: str | None = None):
                 ctx["stats"]["folgas"] += 1
 
         jmin = calculo.jornada_minutos(cfg)
-        for comp in buscar_compensacoes(mes_atual):
+        for comp in repo.compensacoes(mes_atual):
             tipo = comp["tipo"]
             if tipo == "abono":
                 mov = "-" + calculo.hhmm(comp.get("horas_min") or 0)
@@ -437,12 +439,13 @@ def pagina_configuracoes(request: Request):
         "ciclo_exemplo": [],
     }
     try:
-        cfg = carregar_config()
+        repo = repo_de(request)
+        cfg = repo.config()
         ctx["config"] = cfg
         ctx["ciclo_ativo"] = calculo.ciclo_dados(cfg) is not None
         if ctx["ciclo_ativo"]:
             exemplo = []
-            hoje = date.today()
+            hoje = ponto.agora().date()
             for i in range(15):
                 d = hoje + timedelta(days=i)
                 exemplo.append({
@@ -451,8 +454,7 @@ def pagina_configuracoes(request: Request):
                     "status": calculo.ciclo_status(cfg, d),
                 })
             ctx["ciclo_exemplo"] = exemplo
-        feriado_rows, _ = carregar_feriados()
-        ctx["feriados"] = feriado_rows
+        ctx["feriados"] = repo.feriados()
     except Exception as e:
         ctx["db_erro"] = msg_de_erro(e)
     return render(request, "configuracoes.html", **ctx)
@@ -508,8 +510,7 @@ async def salvar_configuracoes(
             "ciclo_referencia": referencia,
             "fds_no_ciclo_dobra": "sim" if fds_no_ciclo_dobra == "sim" else "nao",
         }
-        for chave, valor in valores.items():
-            db.insert("configuracoes", {"chave": chave, "valor": valor}, upsert=True)
+        repo_de(request).salvar_config(valores)
         return redir("/configuracoes", aviso="Configurações salvas!")
     except Exception as e:
         return redir("/configuracoes", erro=msg_de_erro(e))
@@ -518,7 +519,7 @@ async def salvar_configuracoes(
 @app.post("/feriados")
 async def criar_feriado(request: Request, data: str = Form(...), nome: str = Form(...)):
     try:
-        db.insert("feriados", {"data": data, "nome": nome.strip()}, upsert=True)
+        repo_de(request).salvar_feriado(data, nome.strip())
         return redir("/configuracoes", aviso=f"Feriado {data} salvo!")
     except Exception as e:
         return redir("/configuracoes", erro=msg_de_erro(e))
@@ -527,7 +528,8 @@ async def criar_feriado(request: Request, data: str = Form(...), nome: str = For
 @app.post("/feriados/{feriado_id}/excluir")
 async def excluir_feriado(request: Request, feriado_id: int):
     try:
-        db.delete("feriados", {"id": feriado_id})
+        if not repo_de(request).excluir_feriado(feriado_id):
+            return redir("/configuracoes", erro="Feriado não encontrado.")
         return redir("/configuracoes", aviso="Feriado excluído.")
     except Exception as e:
         return redir("/configuracoes", erro=msg_de_erro(e))

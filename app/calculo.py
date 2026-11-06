@@ -184,6 +184,11 @@ def calcular_registro(registro: dict[str, Any], feriados: set[str], cfg: dict[st
     }
 
 
+def registro_fechado(reg: dict) -> bool:
+    """Registro com saída preenchida (turno aberto não entra em cálculo)."""
+    return bool(reg.get("saida"))
+
+
 def resumo_banco(
     registros: list[dict],
     compensacoes: list[dict],
@@ -195,6 +200,8 @@ def resumo_banco(
     folgas = 0
 
     for reg in registros:
+        if not registro_fechado(reg):
+            continue
         calc = calcular_registro(reg, feriados, cfg)
         saldo += calc["extras_min"]
         if calc["folga"]:

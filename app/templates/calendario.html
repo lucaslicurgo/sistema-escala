@@ -129,7 +129,7 @@
               {% if c.feriado %}<span class="inline-block text-[11px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">🎉 {{ c.feriado }}</span>{% endif %}
               {% for p in c.pontos %}
                 <div class="flex items-center justify-between gap-2 text-xs">
-                  <span class="font-mono-numbers text-slate-600">{{ p.entrada }}–{{ p.saida }} · <strong class="text-slate-900">{{ p.total }}</strong></span>
+                  <span class="font-mono-numbers text-slate-600">{{ p.entrada }}–{{ p.saida or "em andamento" }} · <strong class="text-slate-900">{{ p.total }}</strong></span>
                   <span class="flex gap-1">
                     {% if p.extras %}<span class="text-[10.5px] font-bold font-mono-numbers bg-brand-100 text-brand-800 px-1.5 py-0.5 rounded">+{{ p.extras }}</span>{% endif %}
                     {% if p.folga %}<span class="text-[10.5px] font-semibold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">+1 folga</span>{% endif %}
@@ -190,7 +190,7 @@
                     <span class="text-[11px] font-mono-numbers font-bold text-brand-700">{{ p.total }}</span>
                     {% if p.extras %}<span class="text-[9px] font-bold font-mono-numbers bg-brand-100 text-brand-800 px-1 py-0.5 rounded">+{{ p.extras }}</span>{% endif %}
                   </div>
-                  <div class="text-[10px] text-slate-500 font-mono-numbers">{{ p.entrada }}–{{ p.saida }}</div>
+                  <div class="text-[10px] text-slate-500 font-mono-numbers">{{ p.entrada }}–{{ p.saida or "em andamento" }}</div>
                   <div class="flex flex-wrap gap-1 mt-0.5">
                     {% if p.folga %}<span class="text-[9px] font-semibold bg-sky-100 text-sky-700 px-1 py-0.5 rounded">+1 folga</span>{% endif %}
                   </div>

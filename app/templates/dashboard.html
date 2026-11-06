@@ -311,7 +311,7 @@
             {% if l.tipo == 'ponto' and l.folga %}<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">+1 folga</span>{% endif %}
           </div>
           {% if l.tipo == 'ponto' %}
-            <p class="mt-1 text-xs text-slate-600 font-mono-numbers">{{ l.entrada }} → {{ l.saida }} <span class="text-slate-400">· pausa {{ l.pausa }}</span></p>
+            <p class="mt-1 text-xs text-slate-600 font-mono-numbers">{{ l.entrada }} → {{ l.saida or "em andamento" }} <span class="text-slate-400">· pausa {{ l.pausa }}</span></p>
             <p class="mt-0.5 text-xs text-slate-500">Total líquido <strong class="font-mono-numbers text-slate-900">{{ l.total }}</strong></p>
           {% else %}
             <p class="mt-1 text-xs font-medium text-brand-800">{{ l.status }} · <span class="font-mono-numbers">{{ l.rotulo }}</span></p>
@@ -371,7 +371,7 @@
           {% if l.tipo == 'ponto' %}
             <td class="px-3 py-4 font-mono-numbers text-slate-800">{{ l.entrada }}</td>
             <td class="px-3 py-4 font-mono-numbers text-slate-600">{{ l.pausa }}</td>
-            <td class="px-3 py-4 font-mono-numbers text-slate-800">{{ l.saida }}</td>
+            <td class="px-3 py-4 font-mono-numbers text-slate-800">{{ l.saida or "em andamento" }}</td>
             <td class="px-3 py-4 font-mono-numbers font-medium text-slate-900">{{ l.total }}</td>
           {% else %}
             <td class="px-3 py-4 text-slate-400 italic">--:--</td>

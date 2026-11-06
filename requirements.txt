@@ -4,3 +4,4 @@ jinja2
 httpx
 python-multipart
 python-dotenv
+tzdata
