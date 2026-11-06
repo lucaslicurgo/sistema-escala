@@ -22,7 +22,7 @@ horas extras automaticamente e manter um **banco de horas** com folgas.
 - **Compensação**: desconta a jornada base do saldo (dia compensado).
   **Abono**: desconta os minutos que você digitar.
   **Folga**: consome 1 crédito de folga.
-- Tudo fica no **Supabase** (PostgreSQL) e o acesso é protegido por **senha única**.
+- Tudo fica no **Supabase** (PostgreSQL) e cada pessoa tem a própria conta (e-mail e senha) e só vê os próprios dados.
 
 ## Deploy online (Render)
 
@@ -30,7 +30,7 @@ O projeto já tem a receita pronta (`render.yaml`):
 
 1. Crie conta em [render.com](https://render.com) usando **Sign in with GitHub**
 2. Painel → **New +** → **Blueprint** → autorize e escolha o repositório `sistema-escala`
-3. O Render lê o `render.yaml` e pede as **4 variáveis** (logo abaixo) — preencha com os mesmos valores do seu `.env`:
+3. O Render lê o `render.yaml` e pede as **variáveis** (logo abaixo) — preencha com os mesmos valores do seu `.env`:
    - `SECRET_KEY` · `SUPABASE_URL` · `SUPABASE_KEY` · `CODIGO_CONVITE` · `APP_URL` (opcional)
 4. **Apply** e aguarde o build (~1–2 min). O app fica em `https://sistema-escala-xxxx.onrender.com`
 
@@ -63,7 +63,7 @@ de escala que faltem lançamento.
 
 1. Acesse [supabase.com](https://supabase.com) e crie um projeto (é grátis).
 2. Na esquerda: **SQL Editor** → **New query** → cole todo o conteúdo de
-   `sql/schema.sql` → **Run**. Isso cria as 4 tabelas + configurações + feriados.
+   `sql/schema.sql` → **Run**. Isso cria as 4 tabelas (configurações e feriados padrão são criados pelo app no cadastro de cada pessoa).
 3. Vá em **Project Settings → API** e copie:
    - **Project URL** → será a `SUPABASE_URL`
    - **service_role** (secret) → será a `SUPABASE_KEY`
@@ -95,7 +95,28 @@ SUPABASE_KEY=SUA-CHAVE-SERVICE_ROLE
 uvicorn app.main:app --reload --port 8000
 ```
 
-Abra <http://localhost:8000>, entre com a senha e pronto. 🎉
+Abra <http://localhost:8000>, crie sua conta em `/cadastro` (com o código de convite) e pronto. 🎉
+
+## Atualizando para contas (uma vez)
+
+Quem já usava a versão de senha única (a Julia) precisa migrar os dados para a
+conta dela. Faça nesta ordem:
+
+1. No Render, defina `CODIGO_CONVITE` e `APP_URL` (o endereço do app, ex.:
+   `https://sistema-escala-xxxx.onrender.com`).
+2. No Supabase → **Authentication → URL Configuration → Redirect URLs**, adicione
+   `<APP_URL>/redefinir-senha`. Essa lista é o que protege o link de recuperar senha.
+3. Faça o deploy da nova versão.
+4. A Julia cria a conta em `/cadastro` (com o código de convite).
+5. No Supabase → **SQL Editor**, cole `sql/migracao_contas.sql`, troque
+   `COLOQUE-O-EMAIL-DA-JULIA` pelo e-mail dela e rode. Pode rodar de novo sem
+   problema (nada muda na segunda vez). Se o e-mail não existir, aborta sem alterar nada.
+6. Confira o saldo do banco de horas e o calendário: devem estar iguais aos de antes.
+
+> ⚠️ Entre o passo 3 e o 5 o app fica **sem os dados dela** (a conta nova ainda
+> está vazia e o banco ainda está no formato antigo); faça os dois passos em
+> poucos minutos. Nesse intervalo o cadastro pode avisar que não conseguiu
+> preparar a conta: é esperado, a migração do passo 5 resolve.
 
 ## Ajustando as regras (página "Configurações")
 
@@ -106,7 +127,7 @@ Abra <http://localhost:8000>, entre com a senha e pronto. 🎉
 | Fator fds/feriado | 2 | Multiplicador de TODAS as horas do dia (dobro) |
 | Folga fds/feriado | sim | Trabalhar nesses dias gera +1 folga |
 
-Os feriados já vêm com o calendário nacional 2027 (e o fim de 2026) —
+Cada conta nova já começa com o calendário nacional 2027 (e o fim de 2026) —
 adicione/remova livremente na mesma página.
 
 > ⏳ As regras de folga/feriado que você disse que ainda vai **confirmar**
@@ -118,12 +139,13 @@ adicione/remova livremente na mesma página.
 escala-julia/
 ├── app/
 │   ├── main.py              # rotas (dashboard, registros, compensações, config)
-│   ├── auth.py              # login de senha única
+│   ├── auth.py              # contas (Supabase Auth): cadastro, login, recuperar senha
 │   ├── calculo.py           # regras de horas extras e banco de horas
 │   ├── supabase_client.py   # acesso ao Supabase via REST
 │   └── templates/           # páginas HTML
 ├── static/css/style.css
-├── sql/schema.sql           # rode no SQL Editor do Supabase
+├── sql/schema.sql           # instalação nova: rode no SQL Editor do Supabase
+├── sql/migracao_contas.sql  # só para quem já usava a versão de senha única
 ├── .env.example
 └── requirements.txt
 ```
