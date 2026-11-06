@@ -2,73 +2,190 @@
 {% block titulo %}Ponto · Chronos{% endblock %}
 {% block conteudo %}
 {% set saldo_positivo = saldo_min >= 0 %}
-{% macro botao(acao, texto, cor, tamanho='h-20 text-2xl') %}
-<form method="post" action="/ponto/{{ acao }}" data-um-toque>
-  <button type="submit" class="w-full {{ tamanho }} rounded-2xl font-extrabold text-white shadow-card active:scale-[0.98] transition disabled:opacity-60 {{ cor }}">{{ texto }}</button>
+{% set primeiro_nome = (usuario or '').split(' ')[0] %}
+
+{# Anel do dia: o traço enche até completar a jornada #}
+{% macro anel_do_dia(cor='text-brand-600', tamanho='w-56 h-56 sm:w-64 sm:h-64') %}
+<div class="relative {{ tamanho }}">
+  <svg class="w-full h-full -rotate-90" viewBox="0 0 240 240" aria-hidden="true">
+    <circle cx="120" cy="120" r="104" fill="none" stroke="currentColor" stroke-width="16" class="text-slate-200 dark:text-slate-700"></circle>
+    {% if anel %}
+    <circle cx="120" cy="120" r="104" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"
+            stroke-dasharray="{{ anel }} {{ circunferencia }}" class="{{ cor }}"></circle>
+    {% endif %}
+  </svg>
+  <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+    {{ caller() }}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro botao(acao, cor, altura='h-[72px]', fonte='text-xl') %}
+<form method="post" action="/ponto/{{ acao }}" data-um-toque class="w-full">
+  <button type="submit" class="w-full {{ altura }} rounded-2xl font-display font-extrabold {{ fonte }} flex items-center justify-center gap-2.5 active:scale-[0.98] transition disabled:opacity-60 {{ cor }}">{{ caller() }}</button>
 </form>
 {% endmacro %}
 
-<div class="max-w-md mx-auto space-y-4">
-  <!-- Saldo -->
-  <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-subtle flex items-center justify-between">
-    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Saldo do banco</span>
-    <span class="text-2xl font-extrabold font-mono-numbers {{ 'text-positive-600' if saldo_positivo else 'text-rose-600' }}">{{ saldo_min|hhmm }}</span>
-  </div>
+{% macro fatia(rotulo, valor, cor='text-slate-900') %}
+<div class="px-3.5 py-3 min-w-0">
+  <p class="text-xs text-slate-500">{{ rotulo }}</p>
+  <p class="mt-0.5 font-mono-numbers text-lg font-bold {{ cor }} truncate">{{ valor }}</p>
+</div>
+{% endmacro %}
 
-  {% if estado == 'livre' %}
-    {% if fechado_hoje %}
-      <section class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-subtle">
-        <h1 class="text-lg font-bold text-slate-900">Dia fechado</h1>
-        <dl class="mt-3 grid grid-cols-2 gap-y-2 text-sm">
-          <dt class="text-slate-500">Horário</dt><dd class="text-right font-semibold font-mono-numbers">{{ fechado_hoje.entrada }} – {{ fechado_hoje.saida }}</dd>
-          <dt class="text-slate-500">Pausa</dt><dd class="text-right font-semibold font-mono-numbers">{{ resumo.pausa }}</dd>
-          <dt class="text-slate-500">Total</dt><dd class="text-right font-semibold font-mono-numbers">{{ resumo.total }}</dd>
-          <dt class="text-slate-500">Extra</dt><dd class="text-right font-semibold font-mono-numbers">{{ resumo.extra }}</dd>
-        </dl>
-      </section>
-    {% else %}
-      <h1 class="sr-only">Ponto</h1>
-      {{ botao('entrei', 'Entrei', 'bg-brand-600 hover:bg-brand-700', 'h-24 text-3xl') }}
-    {% endif %}
-    {% if desfazivel %}
-      <form method="post" action="/ponto/desfazer" data-um-toque onsubmit="return confirm('Desfazer a saída e voltar a trabalhar?')" class="text-center">
-        <button type="submit" class="text-sm text-slate-500 underline py-3 px-4">Desfazer saída</button>
-      </form>
-    {% endif %}
+<div class="max-w-md md:max-w-5xl mx-auto md:grid md:grid-cols-[minmax(0,1fr)_300px] md:gap-6 md:items-start">
 
-  {% elif estado == 'trabalhando' %}
-    <section class="text-center py-2">
-      <h1 class="text-xl font-bold text-slate-900"><span id="contador" data-inicio="{{ inicio_iso }}" data-pausa="{{ pausa_min }}">Trabalhando há {{ trabalhado }}</span></h1>
-      <p class="text-sm text-slate-500 mt-1">entrou às {{ entrada }}</p>
-    </section>
-    {{ botao('pausa', 'Pausa', 'bg-amber-500 hover:bg-amber-600') }}
-    {{ botao('sai', 'Saí', 'bg-rose-600 hover:bg-rose-700') }}
+  <!-- Coluna principal: estado do dia + ações -->
+  <section class="flex flex-col min-h-[calc(100dvh-11rem)] md:min-h-0 md:bg-white md:border md:border-slate-200/90 md:rounded-3xl md:p-8 md:shadow-subtle">
 
-  {% elif estado == 'pausa' %}
-    <section class="text-center py-2">
-      <h1 class="text-xl font-bold text-slate-900">Em pausa desde {{ pausa_desde }}</h1>
-      <p class="text-sm text-slate-700 mt-1">Trabalhado hoje: {{ trabalhado }}</p>
-      <p class="text-sm text-slate-500 mt-1">entrou às {{ entrada }}</p>
-    </section>
-    {{ botao('voltei', 'Voltei', 'bg-brand-600 hover:bg-brand-700', 'h-24 text-3xl') }}
-    {{ botao('sai', 'Saí', 'bg-rose-600 hover:bg-rose-700', 'h-16 text-lg') }}
-
-  {% elif estado == 'esquecido' %}
-    <section class="bg-white rounded-2xl border border-amber-200 p-5 shadow-subtle">
-      <h1 class="text-lg font-bold text-slate-900">Você não marcou a saída de {{ data_turno }}. Que horas saiu?</h1>
-      {% if pausa_desde %}
-      <p class="mt-2 text-sm text-amber-700">A pausa iniciada às {{ pausa_desde }} será encerrada na hora da saída.</p>
+    <!-- Linha de status + saldo (o saldo vai para a lateral no computador) -->
+    <div class="flex items-center justify-between gap-3">
+      {% if estado == 'trabalhando' %}
+        <p class="flex items-center gap-2 text-[15px] font-semibold text-slate-900 min-w-0"><span class="w-2.5 h-2.5 rounded-full bg-positive-500 shrink-0"></span><span class="truncate">Trabalhando<span class="hidden sm:inline md:inline"> · {{ hoje_extenso }}</span></span></p>
+      {% elif estado == 'pausa' %}
+        <p class="flex items-center gap-2 text-[15px] font-semibold text-slate-900"><span class="w-2.5 h-2.5 rounded-full bg-coral-500 shrink-0"></span>Em pausa desde {{ pausa_desde }}</p>
+      {% elif estado == 'esquecido' %}
+        <p class="text-[15px] font-semibold text-coral-600">Falta marcar uma saída</p>
+      {% else %}
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ hoje_extenso }}</p>
       {% endif %}
-      <form method="post" action="/ponto/esquecido" data-um-toque class="mt-4 space-y-3">
-        <input type="time" name="saida" required class="w-full h-16 text-2xl text-center rounded-xl border border-slate-300 font-mono-numbers">
-        <button type="submit" class="w-full h-16 rounded-2xl text-xl font-extrabold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-60">Salvar</button>
-      </form>
-    </section>
-  {% endif %}
+      <span class="md:hidden shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm {{ 'bg-positive-50' if saldo_positivo else 'bg-rose-50' }}">
+        <span class="text-slate-500 text-xs">Banco</span>
+        <span class="font-mono-numbers font-bold {{ 'text-positive-600' if saldo_positivo else 'text-rose-600' }}">{{ saldo_min|hhmm }}</span>
+      </span>
+    </div>
 
-  <p class="text-center pt-2">
-    <a href="/dashboard" class="text-sm text-slate-500 underline py-3 inline-block">lançar/corrigir manualmente</a>
-  </p>
+    {% if estado == 'livre' and not fechado_hoje %}
+      <h1 class="mt-1 font-display text-3xl font-extrabold text-slate-900">{{ saudacao }}{% if primeiro_nome %}, {{ primeiro_nome }}{% endif %}</h1>
+      <div class="flex-1 flex flex-col items-center justify-center gap-3 py-8">
+        {% call anel_do_dia() %}
+          <span class="font-mono-numbers text-5xl font-bold text-slate-300 dark:text-slate-500">0h00</span>
+          <span class="mt-1 text-sm text-slate-500">de {{ jornada }} de jornada</span>
+        {% endcall %}
+        <p class="text-[15px] text-slate-700">Você ainda não entrou hoje.</p>
+      </div>
+      <div class="space-y-2 md:max-w-sm md:mx-auto md:w-full">
+        {% call botao('entrei', 'bg-coral-500 hover:bg-coral-600 text-white', fonte='text-2xl') %}
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path></svg>
+          Entrei
+        {% endcall %}
+        <p class="text-center text-sm text-slate-500">Marca o horário de agora · <a href="/dashboard" class="text-brand-700 underline">lançar outro horário</a></p>
+      </div>
+
+    {% elif estado == 'livre' and fechado_hoje %}
+      <h1 class="mt-1 font-display text-3xl font-extrabold text-slate-900">Dia fechado. Até amanhã!</h1>
+      <div class="flex-1 flex flex-col items-center justify-center gap-5 py-8 w-full">
+        {% call anel_do_dia() %}
+          <span class="font-mono-numbers text-5xl font-bold {{ 'text-positive-600' if resumo.tem_extra else 'text-slate-900' }}">{{ resumo.extra }}</span>
+          <span class="mt-1 text-sm text-slate-700">de hora extra hoje</span>
+        {% endcall %}
+        <dl class="w-full bg-white border border-slate-200/90 rounded-2xl px-4 divide-y divide-slate-100 text-[15px]">
+          <div class="flex justify-between py-2.5"><dt class="text-slate-500">Entrada e saída</dt><dd class="font-mono-numbers font-bold">{{ fechado_hoje.entrada }} – {{ fechado_hoje.saida }}</dd></div>
+          <div class="flex justify-between py-2.5"><dt class="text-slate-500">Pausas</dt><dd class="font-mono-numbers font-bold">{{ resumo.pausa }}</dd></div>
+          <div class="flex justify-between py-2.5"><dt class="text-slate-500">Trabalhado</dt><dd class="font-mono-numbers font-bold">{{ resumo.total }}</dd></div>
+        </dl>
+      </div>
+
+    {% elif estado == 'trabalhando' %}
+      <h1 class="sr-only">Trabalhando</h1>
+      <div class="flex-1 flex flex-col items-center justify-center gap-5 py-8 w-full">
+        {% call anel_do_dia() %}
+          <span id="contador" data-inicio="{{ inicio_iso }}" data-pausa="{{ pausa_min }}" class="font-mono-numbers text-[52px] leading-none font-bold text-brand-700">{{ trabalhado }}</span>
+          <span class="mt-2 text-[15px] text-slate-700">trabalhadas hoje</span>
+          {% if faltam %}<span class="mt-1 text-sm text-slate-500">faltam {{ faltam }} da jornada</span>
+          {% elif extra_agora %}<span class="mt-1 text-sm font-semibold text-positive-600">+{{ extra_agora }} além da jornada</span>{% endif %}
+        {% endcall %}
+        <div class="w-full bg-white border border-slate-200/90 rounded-2xl grid grid-cols-3 divide-x divide-slate-100">
+          {{ fatia('Entrada', entrada) }}
+          {{ fatia('Pausas', pausas, 'text-slate-500' if pausa_min == 0 else 'text-slate-900') }}
+          {{ fatia('Sem extra até', sem_extra_ate or 'já passou') }}
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 md:max-w-md md:mx-auto md:w-full">
+        {% call botao('pausa', 'bg-white border-2 border-brand-600 dark:border-brand-400 text-brand-700 hover:bg-brand-50') %}
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"></path></svg>
+          Pausa
+        {% endcall %}
+        {% call botao('sai', 'bg-brand-600 hover:bg-brand-700 text-white') %}
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
+          Saí
+        {% endcall %}
+      </div>
+
+    {% elif estado == 'pausa' %}
+      <h1 class="sr-only">Em pausa</h1>
+      <div class="flex-1 flex flex-col items-center justify-center gap-5 py-8 w-full">
+        {% call anel_do_dia('text-brand-300 dark:text-brand-700') %}
+          <span class="text-sm font-bold uppercase tracking-wider text-coral-600">Pausa</span>
+          <span class="font-mono-numbers text-[52px] leading-none font-bold text-coral-600">{{ pausa_atual }} min</span>
+          <span class="mt-2 text-sm text-slate-700">{{ trabalhado }} trabalhadas hoje</span>
+        {% endcall %}
+        <div class="w-full bg-white border border-slate-200/90 rounded-2xl grid grid-cols-3 divide-x divide-slate-100">
+          {{ fatia('Entrada', entrada) }}
+          {{ fatia('Pausa', pausa_desde ~ ' –', 'text-coral-600') }}
+          {{ fatia('Pausas antes', pausas, 'text-slate-500' if pausa_min == 0 else 'text-slate-900') }}
+        </div>
+      </div>
+      <div class="space-y-1 md:max-w-md md:mx-auto md:w-full">
+        {% call botao('voltei', 'bg-brand-600 hover:bg-brand-700 text-white', fonte='text-[22px]') %}
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
+          Voltei
+        {% endcall %}
+        {% call botao('sai', 'text-brand-700 hover:bg-brand-50', 'h-12', 'text-base') %}Saí de vez (encerrar o dia){% endcall %}
+      </div>
+
+    {% elif estado == 'esquecido' %}
+      <div class="flex-1 flex flex-col justify-center gap-5 py-6">
+        <div class="w-14 h-14 rounded-2xl bg-coral-100 flex items-center justify-center">
+          <svg class="w-7 h-7 text-coral-600" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M9 2h6"></path></svg>
+        </div>
+        <div>
+          <h1 class="font-display text-[26px] leading-tight font-extrabold text-slate-900">Você esqueceu de marcar a saída de {{ dia_turno }} ({{ data_turno }})</h1>
+          <p class="mt-2.5 text-base text-slate-700">Entrou às <strong class="font-mono-numbers">{{ entrada }}</strong>. Que horas saiu?</p>
+        </div>
+        <form id="form-esquecido" method="post" action="/ponto/esquecido" data-um-toque class="space-y-3">
+          <label for="saida" class="block text-sm font-semibold text-slate-700">Horário de saída</label>
+          <input id="saida" type="time" name="saida" required class="w-full h-[72px] text-[32px] text-center rounded-2xl border-2 border-brand-600 bg-white font-mono-numbers font-bold">
+          {% if pausa_desde %}
+          <p class="flex gap-2.5 items-start bg-coral-50 rounded-xl px-3.5 py-3 text-sm text-coral-800">
+            <svg class="w-[18px] h-[18px] mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h0"></path></svg>
+            <span>A pausa iniciada às {{ pausa_desde }} será encerrada na hora da saída.</span>
+          </p>
+          {% endif %}
+        </form>
+      </div>
+      <button type="submit" form="form-esquecido" class="w-full h-[72px] rounded-2xl font-display font-extrabold text-[22px] text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-60 md:max-w-md md:mx-auto">Salvar saída</button>
+    {% endif %}
+
+    {% if desfazivel %}
+      <form method="post" action="/ponto/desfazer" data-um-toque onsubmit="return confirm('Desfazer a saída e voltar a trabalhar?')" class="flex justify-center pt-2">
+        <button type="submit" class="h-12 px-5 rounded-xl border border-slate-300 bg-white text-slate-700 text-[15px] font-semibold flex items-center gap-2 hover:bg-slate-50">
+          <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-15-6.7L3 13"></path></svg>
+          Desfazer saída
+        </button>
+      </form>
+    {% endif %}
+  </section>
+
+  <!-- Lateral (só no computador): banco de horas e últimos dias -->
+  <aside class="hidden md:flex flex-col gap-4">
+    <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-subtle">
+      <p class="text-sm font-semibold text-slate-500">Banco de horas</p>
+      <p class="mt-1 font-mono-numbers text-4xl font-bold {{ 'text-positive-600' if saldo_positivo else 'text-rose-600' }}">{{ saldo_min|hhmm }}</p>
+      <p class="mt-1 text-sm text-slate-500">{{ folgas }} folga{{ 's' if folgas != 1 }} disponíve{{ 'is' if folgas != 1 else 'l' }}</p>
+    </div>
+    {% if recentes %}
+    <div class="bg-white border border-slate-200/90 rounded-2xl px-5 pb-2 shadow-subtle">
+      <h2 class="pt-4 pb-1 text-xs font-bold uppercase tracking-wider text-slate-500">Últimos dias</h2>
+      <ul class="divide-y divide-slate-100">
+        {% for r in recentes %}
+        <li class="flex justify-between py-2.5 text-[15px]"><span class="text-slate-700">{{ r.rotulo }}</span><span class="font-mono-numbers font-bold {{ 'text-positive-600' if r.tem_extra else 'text-slate-500' }}">{{ r.extra }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    <a href="/dashboard" class="text-sm text-slate-500 underline text-center py-2">lançar/corrigir manualmente</a>
+  </aside>
 </div>
 {% endblock %}
 
@@ -78,20 +195,20 @@
     document.querySelectorAll('form[data-um-toque]').forEach(function (f) {
       f.addEventListener('submit', function (e) {
         if (e.defaultPrevented) return; // confirm() cancelado: não trava o botão
-        var b = f.querySelector('button[type="submit"]');
+        var b = f.querySelector('button[type="submit"]') || document.querySelector('button[form="' + f.id + '"]');
         if (b) setTimeout(function () { b.disabled = true; }, 0);
       });
     });
     // voltar pelo histórico (bfcache) restaura a página com botões travados
     window.addEventListener('pageshow', function () {
-      document.querySelectorAll('form[data-um-toque] button[type="submit"]').forEach(function (b) { b.disabled = false; });
+      document.querySelectorAll('button[type="submit"]').forEach(function (b) { b.disabled = false; });
     });
     var el = document.getElementById('contador');
     if (!el) return;
     var ini = new Date(el.dataset.inicio).getTime(), pausa = parseInt(el.dataset.pausa, 10) || 0;
     function atualizar() {
       var m = Math.max(0, Math.floor((Date.now() - ini) / 60000) - pausa);
-      el.textContent = 'Trabalhando há ' + Math.floor(m / 60) + 'h ' + String(m % 60).padStart(2, '0');
+      el.textContent = Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0');
     }
     atualizar();
     setInterval(atualizar, 30000);

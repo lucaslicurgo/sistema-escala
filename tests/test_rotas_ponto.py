@@ -78,7 +78,7 @@ def test_estados_da_tela(client_logado, fake_db, relogio):
     c.post("/ponto/entrei")
     relogio(2026, 11, 4, 9, 0)
     t = c.get("/ponto").text
-    assert "Trabalhando há 2h 00" in t and "/ponto/pausa" in t and "/ponto/sai" in t
+    assert "2h00" in t and "trabalhadas hoje" in t and "/ponto/pausa" in t and "/ponto/sai" in t
     assert "/ponto/entrei" not in t
     c.post("/ponto/pausa")
     relogio(2026, 11, 4, 9, 10)
@@ -140,4 +140,39 @@ def test_pausa_mostra_tempo_trabalhado(client_logado, fake_db, relogio):
     relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
     relogio(2026, 11, 4, 10, 0); c.post("/ponto/pausa")
     relogio(2026, 11, 4, 10, 10)
-    assert "Trabalhado hoje: 2h 00" in c.get("/ponto").text
+    t = c.get("/ponto").text
+    assert "2h00 trabalhadas hoje" in t and "10 min" in t
+
+
+def test_trabalhando_mostra_quanto_falta_e_ate_quando_sem_extra(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
+    relogio(2026, 11, 4, 12, 0); c.post("/ponto/pausa")
+    relogio(2026, 11, 4, 12, 30); c.post("/ponto/voltei")
+    relogio(2026, 11, 4, 14, 0)  # 5h30 trabalhadas, jornada 10h
+    t = c.get("/ponto").text
+    assert "5h30" in t and "faltam 4h30 da jornada" in t
+    assert "18:30" in t  # sem extra até: agora + 4h30
+    assert "0h30" in t  # pausas
+
+
+def test_trabalhando_alem_da_jornada(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
+    relogio(2026, 11, 4, 19, 15)
+    t = c.get("/ponto").text
+    assert "+1h15 além da jornada" in t and "já passou" in t
+
+
+def test_dia_fechado_mostra_extra_e_resumo(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
+    relogio(2026, 11, 4, 19, 0); c.post("/ponto/sai")
+    t = c.get("/ponto").text
+    assert "Dia fechado. Até amanhã!" in t and "+1h00" in t and "08:00 – 19:00" in t
+
+
+def test_livre_saudacao_e_jornada(client_logado, fake_db, relogio):
+    relogio(2026, 11, 4, 7, 0)
+    t = client_logado("uid-a", nome="Julia Souza").get("/ponto").text
+    assert "Bom dia, Julia" in t and "de 10h00 de jornada" in t and "Quarta, 4 de novembro" in t

@@ -139,3 +139,13 @@ html.dark .text-indigo-600 { color: #818cf8; }
 html.dark .text-indigo-700, html.dark .text-indigo-900 { color: #a5b4fc; }
 html.dark .border-indigo-200 { border-color: rgba(99, 102, 241, 0.35); }
 html.dark .border-indigo-200\/80 { border-color: rgba(99, 102, 241, 0.35); }
+
+/* Tela de ponto — coral (pausa/aviso) e cartão principal no computador */
+html.dark .bg-coral-50 { background-color: rgba(217, 78, 40, 0.12); }
+html.dark .bg-coral-100 { background-color: rgba(217, 78, 40, 0.2); }
+html.dark .text-coral-600 { color: #ff9a78; }
+html.dark .text-coral-800 { color: #ffc2ad; }
+@media (min-width: 768px) {
+  html.dark .md\:bg-white { background-color: #1e293b; }
+  html.dark .md\:border-slate-200\/90 { border-color: rgba(148, 163, 184, 0.19); }
+}
