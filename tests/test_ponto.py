@@ -4,7 +4,7 @@ import pytest
 
 from app import calculo
 from app.ponto import (
-    FUSO, PontoErro, acao_desfazer_saida, acao_entrei, acao_pausa, acao_sai,
+    FUSO, PontoErro, acao_desfazer_saida, acao_entrei, acao_almoco, acao_sai,
     acao_voltei, estado, minutos_trabalhados,
 )
 
@@ -33,21 +33,21 @@ def test_livre_sem_turno():
 
 def test_varias_pausas_somam():
     t = acao_entrei(sp(2026, 11, 10, 8, 0))
-    t |= acao_pausa(t, sp(2026, 11, 10, 10, 0)); t |= acao_voltei(t, sp(2026, 11, 10, 10, 15))
-    t |= acao_pausa(t, sp(2026, 11, 10, 12, 0)); t |= acao_voltei(t, sp(2026, 11, 10, 13, 0))
-    assert t["pausa_min"] == 75 and t["pausa_inicio"] is None
-    assert minutos_trabalhados(t, sp(2026, 11, 10, 14, 0)) == 6 * 60 - 75
+    t |= acao_almoco(t, sp(2026, 11, 10, 10, 0)); t |= acao_voltei(t, sp(2026, 11, 10, 10, 15))
+    t |= acao_almoco(t, sp(2026, 11, 10, 12, 0)); t |= acao_voltei(t, sp(2026, 11, 10, 12, 45))
+    assert t["pausa_min"] == 60 and t["pausa_inicio"] is None
+    assert minutos_trabalhados(t, sp(2026, 11, 10, 14, 0)) == 6 * 60 - 60
 
 
 def test_minutos_trabalhados_com_pausa_em_andamento():
     t = acao_entrei(sp(2026, 11, 10, 8, 0))
-    t |= acao_pausa(t, sp(2026, 11, 10, 10, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 10, 0))
     assert minutos_trabalhados(t, sp(2026, 11, 10, 10, 30)) == 120
 
 
 def test_sai_durante_pausa_fecha_pausa():
     t = acao_entrei(sp(2026, 11, 10, 8, 0))
-    t |= acao_pausa(t, sp(2026, 11, 10, 12, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 12, 0))
     assert estado(t, sp(2026, 11, 10, 12, 10)) == "pausa"
     t |= acao_sai(t, "12:30")
     assert t["saida"] == "12:30" and t["pausa_min"] == 30 and t["pausa_inicio"] is None
@@ -55,7 +55,7 @@ def test_sai_durante_pausa_fecha_pausa():
 
 def test_pausa_atravessando_meia_noite():
     t = acao_entrei(sp(2026, 11, 10, 22, 0))
-    t |= acao_pausa(t, sp(2026, 11, 10, 23, 50)); t |= acao_voltei(t, sp(2026, 11, 11, 0, 20))
+    t |= acao_almoco(t, sp(2026, 11, 10, 23, 50)); t |= acao_voltei(t, sp(2026, 11, 11, 0, 20))
     assert t["pausa_min"] == 30
 
 
@@ -65,16 +65,47 @@ def test_sem_pausa_vira_extra():
 
 
 def test_acao_invalida():
-    t = acao_entrei(sp(2026, 11, 10, 8, 0)); t |= acao_pausa(t, sp(2026, 11, 10, 9, 0))
-    with pytest.raises(PontoErro): acao_pausa(t, sp(2026, 11, 10, 9, 5))
+    t = acao_entrei(sp(2026, 11, 10, 8, 0)); t |= acao_almoco(t, sp(2026, 11, 10, 9, 0))
+    with pytest.raises(PontoErro): acao_almoco(t, sp(2026, 11, 10, 9, 5))
     t2 = acao_entrei(sp(2026, 11, 10, 8, 0))
     with pytest.raises(PontoErro): acao_voltei(t2, sp(2026, 11, 10, 9, 0))
 
 
 def test_sai_com_duracao_nao_positiva():
     t = acao_entrei(sp(2026, 11, 10, 8, 0))
-    t |= acao_pausa(t, sp(2026, 11, 10, 8, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 8, 0))
     with pytest.raises(PontoErro): acao_sai(t, "08:00")
+
+
+def test_almoco_termina_sozinho_em_1h():
+    t = acao_entrei(sp(2026, 11, 10, 8, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 12, 0))
+    assert estado(t, sp(2026, 11, 10, 12, 59)) == "pausa"
+    assert estado(t, sp(2026, 11, 10, 13, 0)) == "trabalhando"
+    assert minutos_trabalhados(t, sp(2026, 11, 10, 15, 0)) == 6 * 60
+    with pytest.raises(PontoErro): acao_voltei(t, sp(2026, 11, 10, 13, 30))
+
+
+def test_sai_depois_do_almoco_esquecido_desconta_so_1h():
+    t = acao_entrei(sp(2026, 11, 10, 8, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 12, 0))
+    t |= acao_sai(t, "18:00")
+    assert t["pausa_min"] == 60 and t["pausa_inicio"] is None
+
+
+def test_novo_almoco_guarda_o_anterior_encerrado_sozinho():
+    t = acao_entrei(sp(2026, 11, 10, 8, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 12, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 16, 0))
+    assert t["pausa_min"] == 60 and t["pausa_inicio"] == "16:00"
+
+
+def test_esquecido_com_almoco_aberto_conta_no_maximo_1h():
+    t = acao_entrei(sp(2026, 11, 10, 8, 0))
+    t |= acao_almoco(t, sp(2026, 11, 10, 12, 0))
+    assert estado(t, sp(2026, 11, 11, 9, 0)) == "esquecido"
+    t |= acao_sai(t, "17:00")
+    assert t["pausa_min"] == 60
 
 
 def test_desfazer_saida():
@@ -115,8 +146,8 @@ def test_corrigir_entrada_futuro_recusa():
 
 def test_corrigir_entrada_depois_da_pausa_recusa():
     t = acao_entrei(sp(2026, 11, 10, 8, 0))
-    t |= acao_pausa(t, sp(2026, 11, 10, 9, 0))
-    with pytest.raises(PontoErro, match="antes da pausa"):
+    t |= acao_almoco(t, sp(2026, 11, 10, 9, 0))
+    with pytest.raises(PontoErro, match="antes do almoço"):
         acao_corrigir_entrada(t, "09:30", sp(2026, 11, 10, 10, 0))
 
 

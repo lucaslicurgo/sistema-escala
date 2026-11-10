@@ -16,6 +16,7 @@ def agora() -> datetime:
 
 
 LIMITE_ESQUECIDO_MIN = 20 * 60
+ALMOCO_MIN = 60  # o almoço desconta no máximo 1h e termina sozinho
 
 
 class PontoErro(ValueError):
@@ -40,6 +41,18 @@ def _min(delta: timedelta) -> int:
     return int(delta.total_seconds() // 60)
 
 
+def fim_do_almoco(turno: dict) -> datetime:
+    return _ancorar(turno, turno["pausa_inicio"]) + timedelta(minutes=ALMOCO_MIN)
+
+
+def normalizar(turno: dict, agora: datetime) -> dict:
+    """Almoço que já passou de 1h conta como encerrado (1h descontada)."""
+    if turno.get("pausa_inicio") and agora >= fim_do_almoco(turno):
+        return {**turno, "pausa_min": int(turno.get("pausa_min") or 0) + ALMOCO_MIN,
+                "pausa_inicio": None}
+    return turno
+
+
 def estado(
     turno_aberto: dict | None, agora: datetime
 ) -> Literal["livre", "trabalhando", "pausa", "esquecido"]:
@@ -47,10 +60,11 @@ def estado(
         return "livre"
     if agora - inicio_do_turno(turno_aberto) > timedelta(minutes=LIMITE_ESQUECIDO_MIN):
         return "esquecido"
-    return "pausa" if turno_aberto.get("pausa_inicio") else "trabalhando"
+    return "pausa" if normalizar(turno_aberto, agora).get("pausa_inicio") else "trabalhando"
 
 
 def minutos_trabalhados(turno: dict, agora: datetime) -> int:
+    turno = normalizar(turno, agora)
     total = _min(agora - inicio_do_turno(turno)) - int(turno.get("pausa_min") or 0)
     if turno.get("pausa_inicio"):
         total -= _min(agora - _ancorar(turno, turno["pausa_inicio"]))
@@ -96,27 +110,30 @@ def acao_corrigir_entrada(turno: dict, hora: str, agora: datetime) -> dict:
         if pausa < ini:
             pausa += timedelta(days=1)
         if pausa > agora:
-            raise PontoErro("A entrada precisa ser antes da pausa.")
+            raise PontoErro("A entrada precisa ser antes do almoço.")
     return {"entrada": novo["entrada"]}
 
 
-def acao_pausa(turno: dict, agora: datetime) -> dict:
+def acao_almoco(turno: dict, agora: datetime) -> dict:
+    turno = normalizar(turno, agora)
     if turno.get("pausa_inicio"):
-        raise PontoErro("Já está em pausa.")
-    return {"pausa_inicio": agora.strftime("%H:%M")}
+        raise PontoErro("Já está no almoço.")
+    return {"pausa_min": int(turno.get("pausa_min") or 0), "pausa_inicio": agora.strftime("%H:%M")}
 
 
 def _fechar_pausa(turno: dict, hora: str) -> int:
+    """Soma o almoço aberto às pausas, contando no máximo ALMOCO_MIN."""
     ini = _ancorar(turno, turno["pausa_inicio"])
     fim = _ancorar(turno, hora)
     if fim < ini:
         fim += timedelta(days=1)
-    return int(turno.get("pausa_min") or 0) + _min(fim - ini)
+    return int(turno.get("pausa_min") or 0) + min(_min(fim - ini), ALMOCO_MIN)
 
 
 def acao_voltei(turno: dict, agora: datetime) -> dict:
+    turno = normalizar(turno, agora)
     if not turno.get("pausa_inicio"):
-        raise PontoErro("Não está em pausa.")
+        raise PontoErro("Não está no almoço.")
     return {"pausa_min": _fechar_pausa(turno, agora.strftime("%H:%M")), "pausa_inicio": None}
 
 

@@ -1,4 +1,4 @@
-"""Ponto rápido: tela única com botões de um toque (Entrei, Pausa, Voltei, Saí)."""
+"""Ponto rápido: tela única com botões de um toque (Entrei, Almoço, Voltei, Saí)."""
 
 from __future__ import annotations
 
@@ -126,6 +126,8 @@ def tela_ponto(request: Request):
         ctx["jornada"] = _hm(jornada)
         ctx["recentes"] = _recentes(regs, feriados, cfg, hoje)
         if turno:
+            if est != "esquecido":  # no esquecido, mostra o almoço como foi marcado
+                turno = ponto.normalizar(turno, agora)
             ini = ponto.inicio_do_turno(turno)
             mins = ponto.minutos_trabalhados(turno, agora)
             pausas = int(turno.get("pausa_min") or 0)
@@ -139,6 +141,11 @@ def tela_ponto(request: Request):
             ctx["trabalhado"] = _hm(mins)
             ctx["pausas"] = _hm(pausas)
             ctx["pausa_atual"] = max(0, decorrido - mins - pausas)
+            if est == "pausa":
+                fim = ponto.fim_do_almoco(turno)
+                ctx["almoco_ate"] = fim.strftime("%H:%M")
+                ctx["almoco_fim_iso"] = fim.isoformat()
+                ctx["almoco_faltam"] = max(0, ponto.ALMOCO_MIN - ctx["pausa_atual"])
             ctx["anel"] = _anel(mins, jornada)
             ctx["faltam"] = _hm(jornada - mins) if mins < jornada else None
             ctx["extra_agora"] = _hm(mins - jornada) if mins > jornada else None
@@ -212,11 +219,11 @@ def _aplicar_no_turno(request: Request, acao, estados_ok: tuple[str, ...], ok: s
         return redir(DESTINO, erro=f"Não consegui marcar: {msg_de_erro(e)}")
 
 
-@router.post("/ponto/pausa")
-def pausa(request: Request):
+@router.post("/ponto/almoco")
+def almoco(request: Request):
     return _aplicar_no_turno(
-        request, ponto.acao_pausa, ("trabalhando",),
-        "Pausa iniciada.", "Não dá para pausar agora.",
+        request, ponto.acao_almoco, ("trabalhando",),
+        "Bom almoço! Volta sozinho em 1h.", "Não dá para sair para o almoço agora.",
     )
 
 
@@ -224,7 +231,7 @@ def pausa(request: Request):
 def voltei(request: Request):
     return _aplicar_no_turno(
         request, ponto.acao_voltei, ("pausa",),
-        "Bem-vinda de volta!", "Você não está em pausa.",
+        "Bem-vinda de volta!", "Você não está no almoço.",
     )
 
 

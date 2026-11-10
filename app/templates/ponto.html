@@ -55,7 +55,7 @@
       {% if estado == 'trabalhando' %}
         <p class="flex items-center gap-2 text-[15px] font-semibold text-slate-900 min-w-0"><span class="w-2.5 h-2.5 rounded-full bg-positive-500 shrink-0"></span><span class="truncate">Trabalhando<span class="hidden sm:inline md:inline"> · {{ hoje_extenso }}</span></span></p>
       {% elif estado == 'pausa' %}
-        <p class="flex items-center gap-2 text-[15px] font-semibold text-slate-900"><span class="w-2.5 h-2.5 rounded-full bg-coral-500 shrink-0"></span>Em pausa desde {{ pausa_desde }}</p>
+        <p class="flex items-center gap-2 text-[15px] font-semibold text-slate-900"><span class="w-2.5 h-2.5 rounded-full bg-coral-500 shrink-0"></span>Almoço {{ pausa_desde }} – {{ almoco_ate }}</p>
       {% elif estado == 'esquecido' %}
         <p class="text-[15px] font-semibold text-coral-600">Falta marcar uma saída</p>
       {% else %}
@@ -95,7 +95,7 @@
         {% endcall %}
         <dl class="w-full bg-white border border-slate-200/90 rounded-2xl px-4 divide-y divide-slate-100 text-[15px]">
           <div class="flex justify-between py-2.5"><dt class="text-slate-500">Entrada e saída</dt><dd class="font-mono-numbers font-bold">{{ fechado_hoje.entrada }} – {{ fechado_hoje.saida }}</dd></div>
-          <div class="flex justify-between py-2.5"><dt class="text-slate-500">Pausas</dt><dd class="font-mono-numbers font-bold">{{ resumo.pausa }}</dd></div>
+          <div class="flex justify-between py-2.5"><dt class="text-slate-500">Almoço</dt><dd class="font-mono-numbers font-bold">{{ resumo.pausa }}</dd></div>
           <div class="flex justify-between py-2.5"><dt class="text-slate-500">Trabalhado</dt><dd class="font-mono-numbers font-bold">{{ resumo.total }}</dd></div>
         </dl>
       </div>
@@ -111,15 +111,15 @@
         {% endcall %}
         <div class="w-full bg-white border border-slate-200/90 rounded-2xl grid grid-cols-3 divide-x divide-slate-100">
           {{ fatia('Entrada', entrada) }}
-          {{ fatia('Pausas', pausas, 'text-slate-500' if pausa_min == 0 else 'text-slate-900') }}
+          {{ fatia('Almoço', pausas, 'text-slate-500' if pausa_min == 0 else 'text-slate-900') }}
           {{ fatia('Sem extra até', sem_extra_ate or 'já passou') }}
         </div>
         {{ form_hora('entrada', 'Corrigir horário de entrada', 'Salvar', entrada) }}
       </div>
       <div class="grid grid-cols-2 gap-3 md:max-w-md md:mx-auto md:w-full">
-        {% call botao('pausa', 'bg-white border-2 border-brand-600 dark:border-brand-400 text-brand-700 hover:bg-brand-50') %}
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"></path></svg>
-          Pausa
+        {% call botao('almoco', 'bg-white border-2 border-brand-600 dark:border-brand-400 text-brand-700 hover:bg-brand-50') %}
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2 1.5-3 4-3 7v4h3"></path></svg>
+          Almoço
         {% endcall %}
         {% call botao('sai', 'bg-brand-600 hover:bg-brand-700 text-white') %}
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
@@ -128,24 +128,25 @@
       </div>
 
     {% elif estado == 'pausa' %}
-      <h1 class="sr-only">Em pausa</h1>
+      <h1 class="sr-only">No almoço</h1>
       <div class="flex-1 flex flex-col items-center justify-center gap-5 py-8 w-full">
         {% call anel_do_dia('text-brand-300 dark:text-brand-700') %}
-          <span class="text-sm font-bold uppercase tracking-wider text-coral-600">Pausa</span>
-          <span class="font-mono-numbers text-[52px] leading-none font-bold text-coral-600">{{ pausa_atual }} min</span>
-          <span class="mt-2 text-sm text-slate-700">{{ trabalhado }} trabalhadas hoje</span>
+          <span class="text-sm font-bold uppercase tracking-wider text-coral-600">Almoço</span>
+          <span class="text-sm text-slate-700">faltam</span>
+          <span id="almoco" data-fim="{{ almoco_fim_iso }}" class="font-mono-numbers text-[52px] leading-none font-bold text-coral-600">{{ almoco_faltam }} min</span>
+          <span class="mt-2 text-sm text-slate-700">volta sozinho às {{ almoco_ate }}</span>
         {% endcall %}
         <div class="w-full bg-white border border-slate-200/90 rounded-2xl grid grid-cols-3 divide-x divide-slate-100">
           {{ fatia('Entrada', entrada) }}
-          {{ fatia('Pausa', pausa_desde ~ ' –', 'text-coral-600') }}
-          {{ fatia('Pausas antes', pausas, 'text-slate-500' if pausa_min == 0 else 'text-slate-900') }}
+          {{ fatia('Almoço', pausa_desde ~ ' – ' ~ almoco_ate, 'text-coral-600') }}
+          {{ fatia('Trabalhado', trabalhado) }}
         </div>
         {{ form_hora('entrada', 'Corrigir horário de entrada', 'Salvar', entrada) }}
       </div>
       <div class="space-y-1 md:max-w-md md:mx-auto md:w-full">
         {% call botao('voltei', 'bg-brand-600 hover:bg-brand-700 text-white', fonte='text-[22px]') %}
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
-          Voltei
+          Voltei antes
         {% endcall %}
         {% call botao('sai', 'text-brand-700 hover:bg-brand-50', 'h-12', 'text-base') %}Saí de vez (encerrar o dia){% endcall %}
       </div>
@@ -165,7 +166,7 @@
           {% if pausa_desde %}
           <p class="flex gap-2.5 items-start bg-coral-50 rounded-xl px-3.5 py-3 text-sm text-coral-800">
             <svg class="w-[18px] h-[18px] mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h0"></path></svg>
-            <span>A pausa iniciada às {{ pausa_desde }} será encerrada na hora da saída.</span>
+            <span>O almoço iniciado às {{ pausa_desde }} conta no máximo 1h.</span>
           </p>
           {% endif %}
         </form>
@@ -219,6 +220,18 @@
     window.addEventListener('pageshow', function () {
       document.querySelectorAll('button[type="submit"]').forEach(function (b) { b.disabled = false; });
     });
+    // almoço: contagem regressiva e volta sozinho para "Trabalhando" ao fim de 1h
+    var alm = document.getElementById('almoco');
+    if (alm) {
+      var fim = new Date(alm.dataset.fim).getTime();
+      var tique = function () {
+        var resta = fim - Date.now();
+        if (resta <= 0) { location.reload(); return; }
+        alm.textContent = Math.ceil(resta / 60000) + ' min';
+      };
+      tique();
+      setInterval(tique, 15000);
+    }
     var el = document.getElementById('contador');
     if (!el) return;
     var ini = new Date(el.dataset.inicio).getTime(), pausa = parseInt(el.dataset.pausa, 10) || 0;

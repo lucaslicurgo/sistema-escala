@@ -25,7 +25,7 @@ def test_servidor_utc_grava_data_de_sp(client_logado, fake_db, monkeypatch):
 def test_fluxo_completo_mostra_extra(client_logado, fake_db, relogio):
     c = client_logado("uid-a")
     relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
-    relogio(2026, 11, 4, 12, 0); c.post("/ponto/pausa")
+    relogio(2026, 11, 4, 12, 0); c.post("/ponto/almoco")
     relogio(2026, 11, 4, 12, 30); c.post("/ponto/voltei")
     relogio(2026, 11, 4, 20, 30); r = c.post("/ponto/sai", follow_redirects=False)
     assert "Dia fechado: +02:00 de extra" in unquote(r.headers["location"])
@@ -43,9 +43,9 @@ def test_esquecido_pede_saida_e_bloqueia_entrei(client_logado, fake_db, relogio)
     assert "Entrei" in c.get("/ponto").text
 
 
-def test_pausa_sem_turno_nao_quebra(client_logado, fake_db, relogio):
+def test_almoco_sem_turno_nao_quebra(client_logado, fake_db, relogio):
     relogio(2026, 11, 4, 8, 0)
-    r = client_logado("uid-a").post("/ponto/pausa", follow_redirects=False)
+    r = client_logado("uid-a").post("/ponto/almoco", follow_redirects=False)
     assert r.status_code == 303
 
 
@@ -78,12 +78,12 @@ def test_estados_da_tela(client_logado, fake_db, relogio):
     c.post("/ponto/entrei")
     relogio(2026, 11, 4, 9, 0)
     t = c.get("/ponto").text
-    assert "2h00" in t and "trabalhadas hoje" in t and "/ponto/pausa" in t and "/ponto/sai" in t
+    assert "2h00" in t and "trabalhadas hoje" in t and "/ponto/almoco" in t and "/ponto/sai" in t
     assert "/ponto/entrei" not in t
-    c.post("/ponto/pausa")
+    c.post("/ponto/almoco")
     relogio(2026, 11, 4, 9, 10)
     t = c.get("/ponto").text
-    assert "Em pausa desde 09:00" in t and "/ponto/voltei" in t and "/ponto/pausa" not in t
+    assert "Almoço 09:00 – 10:00" in t and "volta sozinho às 10:00" in t and "/ponto/voltei" in t and "/ponto/almoco" not in t
     c.post("/ponto/voltei")
     relogio(2026, 11, 4, 17, 0)
     c.post("/ponto/sai")
@@ -120,10 +120,10 @@ def test_desfazer_turno_noturno_encerrado_hoje(client_logado, fake_db, relogio):
 def test_esquecido_com_pausa_aberta_avisa_e_mostra_dia_fechado(client_logado, fake_db, relogio):
     c = client_logado("uid-a")
     relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
-    relogio(2026, 11, 4, 12, 0); c.post("/ponto/pausa")
+    relogio(2026, 11, 4, 12, 0); c.post("/ponto/almoco")
     relogio(2026, 11, 5, 9, 0)
     t = c.get("/ponto").text
-    assert "A pausa iniciada às 12:00 será encerrada na hora da saída." in t
+    assert "O almoço iniciado às 12:00 conta no máximo 1h." in t
     r = c.post("/ponto/esquecido", data={"saida": "18:00"}, follow_redirects=False)
     assert "Dia fechado" in unquote(r.headers["location"])
 
@@ -132,22 +132,35 @@ def test_esquecido_sem_pausa_nao_mostra_aviso_de_pausa(client_logado, fake_db, r
     c = client_logado("uid-a")
     relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
     relogio(2026, 11, 5, 9, 0)
-    assert "será encerrada na hora da saída" not in c.get("/ponto").text
+    assert "O almoço iniciado" not in c.get("/ponto").text
 
 
 def test_pausa_mostra_tempo_trabalhado(client_logado, fake_db, relogio):
     c = client_logado("uid-a")
     relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
-    relogio(2026, 11, 4, 10, 0); c.post("/ponto/pausa")
+    relogio(2026, 11, 4, 10, 0); c.post("/ponto/almoco")
     relogio(2026, 11, 4, 10, 10)
     t = c.get("/ponto").text
-    assert "2h00 trabalhadas hoje" in t and "10 min" in t
+    assert "2h00" in t and "50 min" in t and "Voltei antes" in t
+
+
+def test_almoco_volta_sozinho_depois_de_1h(client_logado, fake_db, relogio):
+    c = client_logado("uid-a")
+    relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
+    relogio(2026, 11, 4, 12, 0); c.post("/ponto/almoco")
+    relogio(2026, 11, 4, 14, 0)
+    t = c.get("/ponto").text
+    assert "trabalhadas hoje" in t and "5h00" in t and "/ponto/almoco" in t
+    r = c.post("/ponto/voltei", follow_redirects=False)
+    assert "não está no almoço" in unquote(r.headers["location"])
+    relogio(2026, 11, 4, 19, 0); r = c.post("/ponto/sai", follow_redirects=False)
+    assert Repo("uid-a").registros()[0]["pausa_min"] == 60
 
 
 def test_trabalhando_mostra_quanto_falta_e_ate_quando_sem_extra(client_logado, fake_db, relogio):
     c = client_logado("uid-a")
     relogio(2026, 11, 4, 8, 0); c.post("/ponto/entrei")
-    relogio(2026, 11, 4, 12, 0); c.post("/ponto/pausa")
+    relogio(2026, 11, 4, 12, 0); c.post("/ponto/almoco")
     relogio(2026, 11, 4, 12, 30); c.post("/ponto/voltei")
     relogio(2026, 11, 4, 14, 0)  # 5h30 trabalhadas, jornada 10h
     t = c.get("/ponto").text
